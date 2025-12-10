@@ -1,0 +1,26 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+@BaseUrl = http://localhost:5103
+@AccessToken = CfDJ8FkKp4-AFbFLuCh1AppHa340S2nzSP2SwaeaOI3q96AgGo45Kh_gVWSLpBJqynksWxcHyF0n4_Qj9eHHxYy4MO0w8-i1FOtEOKdRpIShAeZAqRvfA4wI2ZL6rYYQmpC5ZVg9ySsolKqkuCtbGzLPorJoU1ynFtlppV3hwqHK3T4fLenqtKoBEvrkiLUakls1h2iKH5eO2a2N84xwDJ9g_KRBvprLYcZ-ARhkqX6uBlXFTyOEJcT-IKuig2FnHeGS5RKS9Xi69j5NjFqXTQSTSUtAsYwEm5O2wZZNvWyVKL53g6LnXD23kgr1zUdUvy9Hkw
+
+### Login
+
+GET {{BaseUrl}}/login?firstApi=true&secondApi=true
+
+
+### Login
+
+GET {{BaseUrl}}/login
+
+### Proxy api/hello
+GET {{BaseUrl}}/api/hello
+Authorization: Bearer {{AccessToken}}
+
+### Proxy api/hello
+
+GET {{BaseUrl}}/first-api/hello
+Authorization: Bearer {{AccessToken}}
+
+### Proxy api/hello
+
+GET {{BaseUrl}}/second-api/hello
+Authorization: Bearer {{AccessToken}}

@@ -1,0 +1,65 @@
+# src/docker-compose.yml
+version: "3.9"
+
+services:
+  # sqlserver:
+  #   image: mcr.microsoft.com/mssql/server:2022-latest
+  #   environment:
+  #     - ACCEPT_EULA=Y
+  #     - SA_PASSWORD=Nam@15112003
+  #   ports:
+  #     - "1432:1433"
+  #   volumes:
+  #     - sqlserver-data:/var/opt/mssql
+  api:
+    image: ${DOCKER_REGISTRY-}api
+    container_name: api
+    build:
+      context: .
+      dockerfile: Services/SRSS.TestGateways/SRSS.TestGateways.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    ports:
+      - 5000:8080
+      - 5001:8081
+    networks:
+      - proxybackend
+  iam_api:
+    build:
+      context: . # src/ là gốc
+      dockerfile: Services/SRSS.IAM/SRSS.IAM.API/Dockerfile # Từ src/
+    ports:
+      - "8081:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__SRSS_IAM_DB=Server=host.docker.internal;Database=SRSS;User Id=sa;Password=12345;TrustServerCertificate=True;
+    networks:
+      - proxybackend
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ApiGateways/YarpApiGateway/Dockerfile
+    ports:
+      - "7232:443"
+      - "5103:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+;http://+
+      - ASPNETCORE_HTTPS_PORT=7232
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=123456
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    volumes:
+      - ../https:/https:ro # LÊN 1 cấp → ExamSubmissionGradingSystem.Microservices/https
+    depends_on:
+      - iam_api
+    networks:
+      - proxybackend
+
+volumes:
+  sqlserver-data:
+  
+networks:
+  proxybackend:
+    name: proxybackend
+    driver: bridge

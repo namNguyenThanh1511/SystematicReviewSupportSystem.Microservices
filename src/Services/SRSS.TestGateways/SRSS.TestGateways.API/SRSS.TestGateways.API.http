@@ -1,0 +1,6 @@
+@SRSS.TestGateways.API_HostAddress = http://localhost:5047
+
+GET {{SRSS.TestGateways.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
