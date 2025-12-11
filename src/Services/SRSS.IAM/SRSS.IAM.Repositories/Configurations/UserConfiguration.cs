@@ -12,8 +12,8 @@ namespace SRSS.IAM.Repositories.Configurations
             builder.Property(u => u.Password).IsRequired();
             builder.Property(u => u.Email).HasMaxLength(100).IsRequired(false);
             builder.HasIndex(u => u.Email).IsUnique();
-            builder.Property(u => u.PhoneNumber).HasMaxLength(15).IsRequired(false);
-            builder.HasIndex(u => u.PhoneNumber).IsUnique();
+            builder.Property(u => u.Username).HasMaxLength(50);
+            builder.HasIndex(u => u.Username).IsUnique();
             builder.Property(u => u.FullName).HasMaxLength(100);
             builder.Property(u => u.Role).IsRequired();
             builder.Property(u => u.Role).HasConversion<string>();

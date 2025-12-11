@@ -1,4 +1,4 @@
-﻿using SRSS.IAM.Services.Configurations;
+﻿using SRSS.IAM.Services.DTOs.Auth;
 using SRSS.IAM.Services.DTOs.User;
 
 namespace SRSS.IAM.Services.AuthService
@@ -6,8 +6,8 @@ namespace SRSS.IAM.Services.AuthService
     public interface IAuthService
     {
         Task RegisterAsync(RegisterRequest request);
-        Task<TokenResponse> LoginAsync(LoginRequest request);
-        Task<TokenResponse> RefreshTokenAsync(string refreshToken);
+        Task<LoginResponse> LoginAsync(LoginRequest request);
+        Task<LoginResponse> RefreshAsync(Guid userId);
         Task LogoutAsync(string userId, string accessToken, TimeSpan accessTokenTtl);
         Task<UserProfileResponse> GetUserProfileAsync(string userId);
     }

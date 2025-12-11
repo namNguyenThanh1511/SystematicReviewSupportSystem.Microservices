@@ -12,8 +12,19 @@ namespace SRSS.IAM.Services.Mappers
                 Id = user.Id,
                 FullName = user.FullName,
                 Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
+                Username = user.Username,
                 IsActive = user.IsActive,
+                Role = user.Role.ToString()
+            };
+        }
+        public static UserProfileResponse ToUserProfileResponse(this User user)
+        {
+            return new UserProfileResponse
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Username = user.Username,
+                FullName = user.FullName,
                 Role = user.Role.ToString()
             };
         }

@@ -54,7 +54,7 @@ namespace SRSS.IAM.API
                 {
                     var errors = context.ModelState
                         .Where(x => x.Value.Errors.Count > 0)
-                        .SelectMany(x => x.Value.Errors.Select(e => new ApiError { Message = e.ErrorMessage }))
+                        .SelectMany(x => x.Value.Errors.Select(e => new ApiError { Code = "INVALID_MODEL_STATE", Message = e.ErrorMessage }))
                         .ToList();
 
                     var response = new ApiResponse

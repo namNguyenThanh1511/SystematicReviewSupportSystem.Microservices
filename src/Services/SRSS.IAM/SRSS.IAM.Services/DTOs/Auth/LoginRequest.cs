@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SRSS.IAM.Services.AuthService
+namespace SRSS.IAM.Services.DTOs.Auth
 {
     public class LoginRequest
     {
-        [Required(ErrorMessage = "Email hoặc số điện thoại không được để trống")]
-        [StringLength(255, ErrorMessage = "Độ dài không được vượt quá 255 ký tự")]
+        [Required(ErrorMessage = "Email/Username không được để trống.")]
+        [StringLength(255, ErrorMessage = "Email/username quá dài.")]
+        [RegularExpression(@"^\S+$", ErrorMessage = "Email/Username không được có space.")]
         public string KeyLogin { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Mật khẩu không được để trống")]

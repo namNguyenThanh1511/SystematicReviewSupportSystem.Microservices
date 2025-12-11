@@ -5,6 +5,6 @@ namespace SRSS.IAM.Services.Exceptions
     public class InvalidCredentialsException : BaseDomainException
     {
         public InvalidCredentialsException(string message = "Thông tin đăng nhập không chính xác")
-            : base(message, HttpStatusCode.BadRequest) { }
+            : base(message, HttpStatusCode.BadRequest, "INVALID_CREDENTIALS") { }
     }
 }

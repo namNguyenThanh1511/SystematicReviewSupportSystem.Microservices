@@ -33,7 +33,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__SRSS_IAM_DB=Server=host.docker.internal;Database=SRSS;User Id=sa;Password=12345;TrustServerCertificate=True;
+      - ConnectionStrings__SRSS_IAM_DB=Server=host.docker.internal;Database=SRSS.IAM;User Id=sa;Password=12345;TrustServerCertificate=True;
     networks:
       - proxybackend
   api-gateway:

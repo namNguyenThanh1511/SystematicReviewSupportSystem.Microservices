@@ -101,7 +101,7 @@ app.UseRateLimiter();   // ✅ Rate limit sau routing
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("login", (bool firstApi = false, bool secondApi = false) =>
+app.MapGet("login", (bool firstApi = false, bool secondApi = false) => //for testing
     Results.SignIn(
         new ClaimsPrincipal(
             new ClaimsIdentity(
@@ -134,12 +134,12 @@ app.MapReverseProxy(proxyPipeline =>
             return;
         }
 
-        // ✅ Course → AdminOnly
-        if (path.StartsWith("/course") && !context.User.IsInRole("Admin"))
-        {
-            context.Response.StatusCode = 403;
-            return;
-        }
+        // ✅ Project → AdminOnly
+        //if (path.StartsWith("/project") && !context.User.IsInRole("Admin"))
+        //{
+        //    context.Response.StatusCode = 403;
+        //    return;
+        //}
 
         await next();
     });

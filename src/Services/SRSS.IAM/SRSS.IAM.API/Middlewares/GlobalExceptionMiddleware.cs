@@ -28,14 +28,14 @@ namespace SRSS.IAM.API.Middlewares
             if (exception is BaseDomainException domainEx)
             {
                 statusCode = (int)domainEx.StatusCode;
-                var errors = new List<ApiError> { new ApiError { Message = domainEx.Message } };
+                var errors = new List<ApiError> { new ApiError { Code = domainEx.ErrorCode, Message = domainEx.Message } };
 
                 response = statusCode switch
                 {
-                    400 => ResponseBuilder.BadRequest("Yêu cầu không hợp lệ", errors),
-                    401 => ResponseBuilder.Unauthorized(domainEx.Message),
+                    400 => ResponseBuilder.BadRequest("Yêu cầu không hợp lệ ", errors),
+                    //401 => ResponseBuilder.Unauthorized("Lacked valid authentication credentials ", errors),
                     403 => ResponseBuilder.Forbidden(domainEx.Message),
-                    404 => ResponseBuilder.NotFound(domainEx.Message),
+                    //404 => ResponseBuilder.NotFound(domainEx.Message),
                     _ => ResponseBuilder.Error(domainEx.Message)
                 };
             }

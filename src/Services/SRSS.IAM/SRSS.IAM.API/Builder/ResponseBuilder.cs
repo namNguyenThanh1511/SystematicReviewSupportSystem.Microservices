@@ -57,9 +57,9 @@ namespace SRSS.IAM.API.Builder
             return Error(message, errors);
         }
 
-        public static ApiResponse<T> NotFound<T>(string message = "Không tìm thấy dữ liệu")
+        public static ApiResponse<T> NotFound<T>(string message = "Không tìm thấy dữ liệu", List<ApiError>? errors = null)
         {
-            return NotFound<T>(message);
+            return NotFound<T>(message, errors);
         }
 
         public static ApiResponse NotFound(string message = "Không tìm thấy dữ liệu")
@@ -109,6 +109,7 @@ namespace SRSS.IAM.API.Builder
                 {
                     errors.Add(new ApiError
                     {
+                        Code = field,
                         Message = error.ErrorMessage,
                     });
                 }

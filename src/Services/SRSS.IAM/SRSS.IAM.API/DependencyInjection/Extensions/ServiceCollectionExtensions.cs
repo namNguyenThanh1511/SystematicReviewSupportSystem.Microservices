@@ -9,6 +9,8 @@ using SRSS.IAM.Services.AuthService;
 using SRSS.IAM.Services.CacheService;
 using SRSS.IAM.Services.Configurations;
 using SRSS.IAM.Services.JWTService;
+using SRSS.IAM.Services.RefreshTokenService;
+using SRSS.IAM.Services.UserService;
 using Swashbuckle.AspNetCore.Filters;
 using System.Reflection;
 using System.Text;
@@ -28,6 +30,9 @@ namespace SRSS.IAM.API.DependencyInjection.Extensions
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             services.AddScoped<IAuthService, AuthService>();
 

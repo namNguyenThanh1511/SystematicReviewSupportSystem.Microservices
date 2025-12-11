@@ -1,8 +1,7 @@
 ﻿using SRSS.IAM.Repositories.Entities;
-using SRSS.IAM.Services.Attributes;
 using System.ComponentModel.DataAnnotations;
 
-namespace SRSS.IAM.Services.AuthService
+namespace SRSS.IAM.Services.DTOs.Auth
 {
     public class RegisterRequest
     {
@@ -10,9 +9,13 @@ namespace SRSS.IAM.Services.AuthService
         [StringLength(100, ErrorMessage = "Họ tên không được vượt quá 100 ký tự")]
         public string FullName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Email or Phone number is required")]
-        [EmailOrPhoneVN]
-        public string KeyRegister { get; set; }
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
+        [MinLength(3, ErrorMessage = "Tên đăng nhập phải có ít nhất 3 ký tự")]
+        public string Username { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Mật khẩu không được để trống")]
         [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự")]

@@ -4,13 +4,12 @@ using SRSS.IAM.Repositories.Entities;
 using SRSS.IAM.Repositories.UnitOfWork;
 using SRSS.IAM.Services.CacheService;
 using SRSS.IAM.Services.Configurations;
-using SRSS.IAM.Services.Constants;
+using SRSS.IAM.Services.DTOs.Auth;
 using SRSS.IAM.Services.DTOs.User;
 using SRSS.IAM.Services.Exceptions;
-using SRSS.IAM.Services.Helper;
 using SRSS.IAM.Services.JWTService;
-using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
+using SRSS.IAM.Services.Mappers;
+using SRSS.IAM.Services.RefreshTokenService;
 
 namespace SRSS.IAM.Services.AuthService
 {
@@ -19,174 +18,96 @@ namespace SRSS.IAM.Services.AuthService
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IJwtService _jwtService;
+        private readonly IRefreshTokenService _refreshTokenService;
         private readonly JwtSettings _jwtSettings;
         private readonly IRedisService _redisService;
 
-        public AuthService(IUnitOfWork unitOfWork, IPasswordHasher<User> passwordHasher, IJwtService jwtService, IOptions<JwtSettings> jwtSettings, IRedisService redisService)
+        public AuthService(IUnitOfWork unitOfWork, IPasswordHasher<User> passwordHasher, IJwtService jwtService, IRefreshTokenService refreshTokenService, IOptions<JwtSettings> jwtSettings, IRedisService redisService)
         {
             _unitOfWork = unitOfWork;
             _passwordHasher = passwordHasher;
             _jwtService = jwtService;
+            _refreshTokenService = refreshTokenService;
             _jwtSettings = jwtSettings.Value;
             _redisService = redisService;
         }
 
-        public async Task<TokenResponse> LoginAsync(LoginRequest request)
+        public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
-            // Validate and determine login type
-            //check if input is email or phone number 
+            string username = request.KeyLogin;
+            string email = request.KeyLogin;
+            var usernameNormalized = username.Trim().ToLower();
+            var emailNormalized = email.Trim().ToLower();
 
-            var emailAttribute = new EmailAddressAttribute();
-            var isEmail = emailAttribute.IsValid(request.KeyLogin);
-            var isPhone = Regex.IsMatch(request.KeyLogin, IRegexStorage.REGEX_PHONE_VN_SIMPLE);
-            if (!isEmail && !isPhone)
+            var existingUser = await _unitOfWork.Users.FindSingleAsync(u =>
+                u.Username.ToLower() == usernameNormalized
+                || u.Email.ToLower() == emailNormalized
+            );
+            if (existingUser == null)
             {
-                throw new InvalidCredentialsException("Vui lòng nhập đúng định dạng email hoặc số điện thoại");
+                throw new NotFoundException("Người dùng không tồn tại");
             }
-            // Find user by email or phone
-            User? user = null;
-            if (isEmail)
+            if (!existingUser.IsActive)
             {
-                user = await _unitOfWork.Users.FindSingleAsync(u => u.Email == request.KeyLogin);
-            }
-            else if (isPhone)
-            {
-                var normalizedPhone = PhoneNumberHelper.NormalizePhoneNumber(request.KeyLogin);
-                user = await _unitOfWork.Users.FindSingleAsync(u => u.PhoneNumber == normalizedPhone);
-            }
-            // Check if user is active
-            if (user == null)
-                throw new NotFoundException("Tài khoản không tồn tại");
-            if (!user.IsActive)
-            {
-                throw new InvalidCredentialsException("Tài khoản đã bị vô hiệu hóa");
+                throw new ForbiddenException("Tài khoản đã bị vô hiệu hóa");
             }
 
             // Verify password
-            var verifyResult = _passwordHasher.VerifyHashedPassword(user, user.Password, request.Password);
+            var verifyResult = _passwordHasher.VerifyHashedPassword(existingUser, existingUser.Password, request.Password);
             if (verifyResult == PasswordVerificationResult.Failed)
             {
                 throw new InvalidCredentialsException("Mật khẩu không chính xác");
             }
-
-            // Generate tokens
-            var accessToken = _jwtService.GenerateAccessToken(user);
-            var refreshToken = await _jwtService.GenerateRefreshTokenAsync(user.Id);
-            // Save refresh token
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays);
-            await _unitOfWork.Users.UpdateAsync(user);
+            var accessToken = _jwtService.GenerateAccessToken(existingUser);
+            await _unitOfWork.Users.UpdateAsync(existingUser);
             await _unitOfWork.SaveChangesAsync();
 
-            return new TokenResponse
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken,
-                AccessTokenExpiry = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
-                RefreshTokenExpiry = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays)
-            };
+            return CreateLoginResponse(existingUser, accessToken);
         }
 
         public async Task RegisterAsync(RegisterRequest request)
         {
-            //validate email format and phoneNumber
-            bool isEmail = ValidationHelper.IsEmail(request.KeyRegister);
-            bool isPhone = ValidationHelper.IsPhoneNumber(request.KeyRegister) && ValidationHelper.IsVietnamesePhone(request.KeyRegister);
-            bool isCreateAccount = false;
-            if (!isEmail && !isPhone)
-            {
-                throw new BadRequestException("Tài khoản không đúng định dạng email hoặc số điện thoại");
-            }
-            string? email = null;
-            string? phoneNumber = null;
-            if (isEmail)
-            {
-                email = request.KeyRegister;
-                var existingEmailUser = await _unitOfWork.Users.FindSingleAsync(u => u.Email == email);
+            // Check if username/email already exists
+            var usernameNormalized = request.Username.Trim().ToLower();
+            var emailNormalized = request.Email.Trim().ToLower();
 
-                if (existingEmailUser != null)
-                {
-                    //if (!existingEmailUser.isVerified)//đã tạo account nhưng chưa verify qua otp
-                    //{
-                    //    try
-                    //    {
-                    //        await RequestOTPDbAsync(email);
+            var existingUser = await _unitOfWork.Users.FindSingleAsync(u =>
+                u.Username.ToLower() == usernameNormalized
+                || u.Email.ToLower() == emailNormalized
+            );
 
-                    //    }
-                    //    catch (OTPRequiredException e)
-                    //    {
-                    //        throw new OTPRequiredException(e.Message, "email");
-                    //    }
-                    //}
-                    //else //trùng email với user khác
-                    //{
-                    //    throw new Exception("Email này đã được đăng kí");
-                    //}
-                    throw new BadRequestException("Email này đã được đăng kí");
-                }
-                else
-                {
-                    //await SendEmailOTPDb(email, model.fullName, null);
-                    isCreateAccount = true;
-                }
-
-            }
-            else if (isPhone)
+            if (existingUser != null)
             {
-                phoneNumber = ValidationHelper.CleanPhoneForDB(request.KeyRegister);
-                var existingPhoneUser = await _unitOfWork.Users.FindSingleAsync(u => u.PhoneNumber == phoneNumber);
-                if (existingPhoneUser != null)
-                {
-                    //if (!existingPhoneUser.isVerified)//đã tạo account nhưng chưa verify qua otp
-                    //{
-                    //    try
-                    //    {
-                    //        await RequestOTPDbAsync(phoneNumber);
-
-                    //    }
-                    //    catch (OTPRequiredException e)
-                    //    {
-                    //        throw new OTPRequiredException(e.Message, "phone");
-                    //    }
-                    //}
-                    //else//trùng email với user khác
-                    //{
-                    //    throw new Exception("Số điện thoại này đã được đăng kí");
-                    //}
-                    throw new BadRequestException("Số điện thoại này đã được đăng kí");
-                }
-                else
-                {
-                    //await _zaloApiService.SendOTPDbAsync(phoneNumber, null, false);
-                    isCreateAccount = true;
-                }
-            }
-            else
-            {
-                throw new BadRequestException("Không đúng định dạng email hoặc số điện thoại");
+                throw new BadRequestException("Email/tên đăng nhập này đã được đăng kí");
             }
 
-            if (isCreateAccount)
+
+            // Create and save user
+            var newUser = new User()
             {
-                // Create and save user
-                var newUser = new User()
-                {
-                    FullName = request.FullName,
-                    Email = email,
-                    PhoneNumber = phoneNumber,
-                    Role = request.Role,
-                    Password = _passwordHasher.HashPassword(null, request.Password),
-                    IsActive = true,
-                };
-                await _unitOfWork.Users.AddAsync(newUser);
-                await _unitOfWork.SaveChangesAsync();
-            }
+                Username = usernameNormalized,
+                FullName = request.FullName,
+                Email = emailNormalized,
+                Role = request.Role,
+                Password = _passwordHasher.HashPassword(null, request.Password),
+                IsActive = true,
+            };
+            await _unitOfWork.Users.AddAsync(newUser);
+            await _unitOfWork.SaveChangesAsync();
         }
 
 
-        public Task<TokenResponse> RefreshTokenAsync(string refreshToken)
+        public async Task<LoginResponse> RefreshAsync(Guid userId)
         {
-            return _jwtService.RefreshTokenAsync(refreshToken);
+            var user = await _unitOfWork.Users.FindSingleAsync(u => u.Id == userId)
+                ?? throw new NotFoundException("Người dùng không tồn tại");
+            if (user.IsActive == false)
+            {
+                throw new ForbiddenException("Tài khoản đã bị vô hiệu hóa");
+            }
+            // Generate new access token
+            var newAccessToken = _jwtService.GenerateAccessToken(user);
+            return CreateLoginResponse(user, newAccessToken);
         }
 
         public async Task LogoutAsync(string userId, string accessToken, TimeSpan accessTokenTtl)
@@ -215,15 +136,21 @@ namespace SRSS.IAM.Services.AuthService
             {
                 throw new NotFoundException("Người dùng không tồn tại");
             }
-            return new UserProfileResponse
-            {
-                Id = user.Id,
-                FullName = user.FullName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                Role = user.Role.ToString(),
-            };
+            return user.ToUserProfileResponse();
 
+        }
+
+        private LoginResponse CreateLoginResponse(User user, string accessToken)
+        {
+            return new LoginResponse
+            {
+                UserId = user.Id,
+                Username = user.FullName,
+                Email = user.Email,
+                Role = user.Role.ToString(),
+                AccessToken = accessToken,
+                AccessTokenExpiresAt = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
+            };
         }
     }
 }

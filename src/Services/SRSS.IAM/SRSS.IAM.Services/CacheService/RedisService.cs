@@ -17,6 +17,8 @@ namespace SRSS.IAM.Services.CacheService
 
         public async Task RemoveAsync(string key)
             => await _db.KeyDeleteAsync(key);
+        public async Task<bool> ExistsAsync(string key)
+            => await _db.KeyExistsAsync(key);
         public async Task<TimeSpan> GetTTLAysnc(string key)
         {
 
@@ -28,5 +30,6 @@ namespace SRSS.IAM.Services.CacheService
             return ttl.Value;
 
         }
+
     }
 }

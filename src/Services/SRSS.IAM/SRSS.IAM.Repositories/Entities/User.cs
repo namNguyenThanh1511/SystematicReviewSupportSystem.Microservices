@@ -4,10 +4,10 @@ namespace SRSS.IAM.Repositories.Entities
 {
     public class User : BaseEntity<Guid>
     {
+        public string Username { get; set; }
         public string Password { get; set; }
         public string FullName { get; set; }
-        public string? Email { get; set; }
-        public string? PhoneNumber { get; set; }
+        public string Email { get; set; }
         public Role Role { get; set; }
         public bool IsActive { get; set; } = true;
         public string? RefreshToken { get; set; }

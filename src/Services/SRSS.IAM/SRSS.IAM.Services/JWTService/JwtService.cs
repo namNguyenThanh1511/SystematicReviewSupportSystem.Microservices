@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SRSS.IAM.Repositories.Entities;
 using SRSS.IAM.Repositories.UnitOfWork;
 using SRSS.IAM.Services.Configurations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 
 
@@ -16,11 +16,13 @@ namespace SRSS.IAM.Services.JWTService
         private readonly JwtSettings _jwtSettings;
         private readonly IUnitOfWork _unitOfWork;
         private readonly JwtSecurityTokenHandler _tokenHandler;
-        public JwtService(IOptions<JwtSettings> jwtSettings, IUnitOfWork unitOfWork)
+        private readonly ILogger<JwtService> _logger;
+        public JwtService(IOptions<JwtSettings> jwtSettings, IUnitOfWork unitOfWork, ILogger<JwtService> logger)
         {
             _jwtSettings = jwtSettings.Value;
             _unitOfWork = unitOfWork;
             _tokenHandler = new JwtSecurityTokenHandler();
+            _logger = logger;
         }
         public string GenerateAccessToken(User user)
         {
@@ -38,7 +40,7 @@ namespace SRSS.IAM.Services.JWTService
                         new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(),
                         ClaimValueTypes.Integer64)
                 }),
-                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes * 24),// 60 * 24 = 1 day
+                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
                 Issuer = _jwtSettings.Issuer,
                 Audience = _jwtSettings.Audience,
                 SigningCredentials = new SigningCredentials(
@@ -49,86 +51,27 @@ namespace SRSS.IAM.Services.JWTService
             var token = _tokenHandler.CreateToken(tokenDescriptor);
             return _tokenHandler.WriteToken(token);
         }
-
-        public async Task<string> GenerateRefreshTokenAsync(Guid userId)
-        {
-            return GenerateRandomToken();
-        }
-
-        public async Task<bool> IsRevokeAsync(string refreshToken)
-        {
-            User? user = await _unitOfWork.Users.FindSingleAsync(u => u.RefreshToken == refreshToken);
-            if (user != null && user.IsRefreshTokenRevoked)
-            {
-                return true;
-            }
-            return false;
-
-        }
-
-        public async Task<TokenResponse> RefreshTokenAsync(string refreshToken)
-        {
-            // find user by refresh token
-            var user = await _unitOfWork.Users.FindSingleAsync(u => u.RefreshToken == refreshToken);
-
-            if (user.RefreshToken == null || user.RefreshTokenExpiryTime < DateTime.UtcNow)
-            {
-                throw new UnauthorizedAccessException("Invalid or expired refresh token");
-            }
-            if (user == null || !user.IsActive)
-            {
-                throw new UnauthorizedAccessException("User not found or inactive");
-            }
-
-            // Generate new tokens
-            var newAccessToken = GenerateAccessToken(user);
-            var newRefreshToken = await GenerateRefreshTokenAsync(user.Id);
-            user.RefreshToken = newRefreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays);
-            await _unitOfWork.Users.UpdateAsync(user);
-            await _unitOfWork.SaveChangesAsync();
-
-
-            return new TokenResponse
-            {
-                AccessToken = newAccessToken,
-                RefreshToken = newRefreshToken,
-                AccessTokenExpiry = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
-                RefreshTokenExpiry = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays)
-            };
-        }
-
-
-
         public bool ValidateAccessToken(string token)
         {
             try
             {
                 var validationParameters = GetTokenValidationParameters();
                 _tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
-                return validatedToken is JwtSecurityToken jwtToken &&
+
+                var isValid = validatedToken is JwtSecurityToken jwtToken &&
                        jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
+
+                if (!isValid)
+                    _logger.LogWarning("JWT validation failed for token");
+
+                return isValid;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogWarning($"JWT validation exception: {ex.Message}");
                 return false;
             }
         }
-
-        public async Task<bool> ValidateRefreshTokenAsync(string token)
-        {
-            var user = await _unitOfWork.Users.FindSingleAsync(u => u.RefreshToken == token);
-            return user != null && user.RefreshTokenExpiryTime > DateTime.UtcNow;
-        }
-
-        private string GenerateRandomToken()
-        {
-            var randomBytes = new byte[64];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(randomBytes);
-            return Convert.ToBase64String(randomBytes);
-        }
-
         private TokenValidationParameters GetTokenValidationParameters()
         {
             return new TokenValidationParameters

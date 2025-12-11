@@ -1,4 +1,4 @@
-﻿using SRSS.IAM.Services.JWTService;
+﻿using SRSS.IAM.Services.CacheService;
 
 namespace SRSS.IAM.API.Middlewares
 {
@@ -10,17 +10,19 @@ namespace SRSS.IAM.API.Middlewares
         {
             _next = next;
         }
-
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, IRedisService redisService)
         {
-            var _jwtService = context.RequestServices.GetRequiredService<IJwtService>();
-
             var token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-            if (!string.IsNullOrEmpty(token) && await _jwtService.IsRevokeAsync(token))
+
+            if (!string.IsNullOrEmpty(token))
             {
-                context.Response.StatusCode = 401;
-                await context.Response.WriteAsync("Token has been revoked");
-                return;
+                var isBlacklisted = await redisService.ExistsAsync($"blacklist:{token}");
+                if (isBlacklisted)
+                {
+                    context.Response.StatusCode = 401;
+                    await context.Response.WriteAsJsonAsync(new { message = "Token has been revoked" });
+                    return;
+                }
             }
 
             await _next(context);
