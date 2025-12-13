@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace SRSS.IAM.Services.Exceptions
+namespace Shared.Exceptions
 {
     public class BadRequestException : BaseDomainException
     {

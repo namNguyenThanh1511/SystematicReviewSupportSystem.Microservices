@@ -1,6 +1,7 @@
-﻿using SRSS.IAM.Services.CacheService;
+﻿using Microsoft.AspNetCore.Http;
+using Shared.Cache;
 
-namespace SRSS.IAM.API.Middlewares
+namespace Shared.Middlewares
 {
     public class JwtBlacklistMiddleware
     {
@@ -10,7 +11,7 @@ namespace SRSS.IAM.API.Middlewares
         {
             _next = next;
         }
-        public async Task InvokeAsync(HttpContext context, IRedisService redisService)
+        public async Task InvokeAsync(HttpContext context, IRedisCacheService redisService)
         {
             var token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 

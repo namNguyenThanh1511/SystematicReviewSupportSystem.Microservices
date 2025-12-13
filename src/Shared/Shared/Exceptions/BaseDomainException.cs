@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace SRSS.IAM.Services.Exceptions
+namespace Shared.Exceptions
 {
     /// <summary>
     /// Base class for domain-level exceptions with HTTP status mapping.

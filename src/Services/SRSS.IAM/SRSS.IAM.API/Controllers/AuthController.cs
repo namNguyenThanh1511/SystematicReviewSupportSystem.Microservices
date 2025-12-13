@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SRSS.IAM.API.Models;
+using Shared.Models;
 using SRSS.IAM.Services.AuthService;
 using SRSS.IAM.Services.DTOs.Auth;
 using SRSS.IAM.Services.DTOs.User;

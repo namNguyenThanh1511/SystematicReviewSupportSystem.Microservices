@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using Shared.Cache;
+using Shared.Exceptions;
 using SRSS.IAM.Repositories.Entities;
 using SRSS.IAM.Repositories.UnitOfWork;
-using SRSS.IAM.Services.CacheService;
 using SRSS.IAM.Services.Configurations;
 using SRSS.IAM.Services.DTOs.Auth;
 using SRSS.IAM.Services.DTOs.User;
-using SRSS.IAM.Services.Exceptions;
 using SRSS.IAM.Services.JWTService;
 using SRSS.IAM.Services.Mappers;
 using SRSS.IAM.Services.RefreshTokenService;
@@ -20,9 +20,9 @@ namespace SRSS.IAM.Services.AuthService
         private readonly IJwtService _jwtService;
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly JwtSettings _jwtSettings;
-        private readonly IRedisService _redisService;
+        private readonly IRedisCacheService _redisService;
 
-        public AuthService(IUnitOfWork unitOfWork, IPasswordHasher<User> passwordHasher, IJwtService jwtService, IRefreshTokenService refreshTokenService, IOptions<JwtSettings> jwtSettings, IRedisService redisService)
+        public AuthService(IUnitOfWork unitOfWork, IPasswordHasher<User> passwordHasher, IJwtService jwtService, IRefreshTokenService refreshTokenService, IOptions<JwtSettings> jwtSettings, IRedisCacheService redisService)
         {
             _unitOfWork = unitOfWork;
             _passwordHasher = passwordHasher;
@@ -124,7 +124,7 @@ namespace SRSS.IAM.Services.AuthService
 
             // 2. Blacklist access token in Redis
             // Key: "blacklist:{accessToken}", Value: "revoked", Expiry: accessTokenTtl
-            await _redisService.SetAsync($"blacklist:{accessToken}", "revoked", accessTokenTtl);
+            await _redisService.SetAsync($"iam:blacklist:{accessToken}", "revoked", accessTokenTtl);
         }
 
 

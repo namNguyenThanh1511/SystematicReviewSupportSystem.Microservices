@@ -1,39 +1,39 @@
-# ??? MICROSERVICE ARCHITECTURE REVIEW
+﻿# 🏗️ MICROSERVICE ARCHITECTURE REVIEW
 
-## ?? Executive Summary
+## 📋 Executive Summary
 
-**Architecture Status:** ?? **PARTIAL MICROSERVICE** (55% compliance)
+**Architecture Status:** ⚠️ **PARTIAL MICROSERVICE** (55% compliance)
 
-H? th?ng ?ang th?c hi?n ki?n tr�c microservice nh?ng c�n nhi?u ?i?m ch?a chu?n. C� nh?ng y?u t? t?t nh?ng c?ng c� nh?ng vi ph?m nguy�n t?c microservice quan tr?ng.
+Hệ thống đang thực hiện kiến trúc microservice nhưng còn nhiều điểm chưa chuẩn. Có những yếu tố tốt nhưng cũng có những vi phạm nguyên tắc microservice quan trọng.
 
 ---
 
-## ?? C�c Ti�u Ch� ?�nh Gi� Microservice
+## 🎯 Các Tiêu Chí Đánh Giá Microservice
 
-### 1?? **SERVICE INDEPENDENCE** (??c l?p c?a services)
+### 1️⃣ **SERVICE INDEPENDENCE** (Độc lập của services)
 
-#### ? **Y�U C?U:** M?i service c� database ri�ng bi?t
-**Hi?n tr?ng:**
+#### ✅ **YÊU CẦU:** Mỗi service có database riêng biệt
+**Hiện trạng:**
 ```
-? IAM Service   ? Database: SRSS.IAM (ri�ng)
-? Course Service ? (Gi? ??nh ri�ng)
-? Submission Service ? (Gi? ??nh ri�ng)
+✅ IAM Service   → Database: SRSS.IAM (riêng)
+✅ Course Service → (Giả định riêng)
+✅ Submission Service → (Giả định riêng)
 ```
 
-**?�nh gi�:** ? T?t - M?i service c� database ri�ng
+**Đánh giá:** ✅ Tốt - Mỗi service có database riêng
 
-#### ? **V?N ??:** Shared JWT Secret Key
+#### ❌ **VẤN ĐỀ:** Shared JWT Secret Key
 ```csharp
 // Gateway appsettings.json
 "secretKey": "DhftOS5uphK3vmCJQrexST1RsyjZBjXWRgJMFPU4"
 
 // IAM appsettings.json
-"secretKey": "DhftOS5uphK3vmCJQrexST1RsyjZBjXWRgJMFPU4"  // ? SAME!
+"secretKey": "DhftOS5uphK3vmCJQrexST1RsyjZBjXWRgJMFPU4"  // ❌ SAME!
 ```
 
-**V?n ??:**
-- ?? N?u 1 service b? x�m ph?m ? To�n b? h? th?ng ? nguy hi?m
-- ? Vi ph?m nguy�n t?c service isolation
+**Vấn đề:**
+- 🔴 Nếu 1 service bị xâm phạm → Toàn bộ hệ thống ở nguy hiểm
+- ❌ Vi phạm nguyên tắc service isolation
 
 **Recommendation:**
 ```json
@@ -47,53 +47,53 @@ H? th?ng ?ang th?c hi?n ki?n tr�c microservice nh?ng c�n nhi?u ?i?m ch?a chu?n. 
 
 ---
 
-### 2?? **API GATEWAY PATTERN**
+### 2️⃣ **API GATEWAY PATTERN**
 
-#### ? **Y�U C?U:** D�ng API Gateway ?? route requests
-**Hi?n tr?ng:**
+#### ✅ **YÊU CẦU:** Dùng API Gateway để route requests
+**Hiện trạng:**
 ```
-? D�ng YARP (Yet Another Reverse Proxy)
-? File: ApiGateways\YarpApiGateway\appsettings.json
-? Gateway route t?i services
+✅ Dùng YARP (Yet Another Reverse Proxy)
+✅ File: ApiGateways\YarpApiGateway\appsettings.json
+✅ Gateway route tới services
 ```
 
-#### ?? **ISSUE 1: Hardcoded Service URLs**
+#### ⚠️ **ISSUE 1: Hardcoded Service URLs**
 ```json
 "Clusters": {
   "iam-cluster": {
     "Destinations": {
-      "dest": { "Address": "http://localhost:8081/" }  // ? Hard-coded localhost
+      "dest": { "Address": "http://localhost:8081/" }  // ❌ Hard-coded localhost
     }
   }
 }
 ```
 
-**V?n ??:**
-- ? Kh�ng scalable - Ch? 1 instance
-- ? Kh�ng th�ch h?p cho production/Kubernetes
-- ? Khi scale ? Ph?i update config
+**Vấn đề:**
+- ❌ Không scalable - Chỉ 1 instance
+- ❌ Không thích hợp cho production/Kubernetes
+- ❌ Khi scale → Phải update config
 
 **Fix:**
 ```json
 "iam-cluster": {
   "Destinations": {
-    "dest1": { "Address": "http://iam-service:8080/" },      // ? DNS name
+    "dest1": { "Address": "http://iam-service:8080/" },      // ✅ DNS name
     "dest2": { "Address": "http://iam-service-replica:8080/" }
   },
-  "LoadBalancingPolicy": "RoundRobin"  // ? Load balancing
+  "LoadBalancingPolicy": "RoundRobin"  // ✅ Load balancing
 }
 ```
 
-#### ?? **ISSUE 2: Thi?u Load Balancing Configuration**
+#### ⚠️ **ISSUE 2: Thiếu Load Balancing Configuration**
 ```json
-// Hi?n t?i: Ch? c� 1 destination, kh�ng c� load balancing
+// Hiện tại: Chỉ có 1 destination, không có load balancing
 "api1-cluster": {
   "Destinations": {
     "destination1": {
       "Address": "http://localhost:8080"
     }
   }
-  // ? Kh�ng c� LoadBalancingPolicy
+  // ❌ Không có LoadBalancingPolicy
 }
 ```
 
@@ -104,62 +104,62 @@ H? th?ng ?ang th?c hi?n ki?n tr�c microservice nh?ng c�n nhi?u ?i?m ch?a chu?n. 
     "dest1": { "Address": "http://localhost:8080" },
     "dest2": { "Address": "http://localhost:8081" }
   },
-  "LoadBalancingPolicy": "RoundRobin"  // ? Add this
+  "LoadBalancingPolicy": "RoundRobin"  // ✅ Add this
 }
 ```
 
 ---
 
-### 3?? **AUTHENTICATION & AUTHORIZATION**
+### 3️⃣ **AUTHENTICATION & AUTHORIZATION**
 
-#### ? **Y�U C?U:** Centralized Authentication
-**Hi?n tr?ng:**
+#### ✅ **YÊU CẦU:** Centralized Authentication
+**Hiện trạng:**
 ```
-? IAM Service c?p JWT tokens
-? Gateway validate token
-? M?i service validate token
+✅ IAM Service cấp JWT tokens
+✅ Gateway validate token
+✅ Mỗi service validate token
 ```
 
-#### ? **ISSUE: JWT Secret Key chia s?**
+#### ❌ **ISSUE: JWT Secret Key chia sẻ**
 ```
 Gateway appsettings.json
-  ?? validIssuer: "SRSSAPI"
-  ?? validAudience: "SRSSClient"
-  ?? secretKey: "DhftOS5uphK3vmCJQrexST1RsyjZBjXWRgJMFPU4"
+  ├─ validIssuer: "SRSSAPI"
+  ├─ validAudience: "SRSSClient"
+  └─ secretKey: "DhftOS5uphK3vmCJQrexST1RsyjZBjXWRgJMFPU4"
 
 IAM appsettings.json
-  ?? validIssuer: "SRSSAPI"
-  ?? validAudience: "SRSSClient"
-  ?? secretKey: "DhftOS5uphK3vmCJQrexST1RsyjZBjXWRgJMFPU4"  // ? Same!
+  ├─ validIssuer: "SRSSAPI"
+  ├─ validAudience: "SRSSClient"
+  └─ secretKey: "DhftOS5uphK3vmCJQrexST1RsyjZBjXWRgJMFPU4"  // ❌ Same!
 ```
 
-**V?n ??:**
-- ? C?n chia s? ?? validate token
-- ? Nh?ng hard-coded ? B?o m?t y?u
-- ?? Khi rotate key ? Ph?i update nhi?u ch?
+**Vấn đề:**
+- ✅ Cần chia sẻ để validate token
+- ❌ Nhưng hard-coded → Bảo mật yếu
+- ⚠️ Khi rotate key → Phải update nhiều chỗ
 
 ---
 
-### 4?? **SERVICE-TO-SERVICE COMMUNICATION**
+### 4️⃣ **SERVICE-TO-SERVICE COMMUNICATION**
 
-#### ? **V?N ??:** Kh�ng c� pattern ?? g?i service kh�c
+#### ❌ **VẤN ĐỀ:** Không có pattern để gọi service khác
 
-**Hi?n tr?ng:**
+**Hiện trạng:**
 ```
-? Kh�ng c� HttpClient registered
-? Kh�ng c� service-to-service calls
-? Kh�ng c� circuit breaker pattern
-? Kh�ng c� retry policy
-? Kh�ng c� resilience strategy
+❌ Không có HttpClient registered
+❌ Không có service-to-service calls
+❌ Không có circuit breaker pattern
+❌ Không có retry policy
+❌ Không có resilience strategy
 ```
 
-**Scenario v?n ??:**
+**Scenario vấn đề:**
 ```
-Course Service c?n l?y User info t? IAM:
+Course Service cần lấy User info từ IAM:
   CourseService.CreateCourse(userId) 
-    ? g?i IAM.GetUser(userId)
-    ? N?u IAM fail ? Course fail (cascading failure)
-    ? Kh�ng c� retry/circuit breaker
+    → gọi IAM.GetUser(userId)
+    → Nếu IAM fail → Course fail (cascading failure)
+    → Không có retry/circuit breaker
 ```
 
 **Recommendation:**
@@ -171,10 +171,10 @@ builder.Services.AddHttpClient<IIamServiceClient, IamServiceClient>()
         client.BaseAddress = new Uri(configuration["Services:Iam:Url"]);
         client.Timeout = TimeSpan.FromSeconds(5);
     })
-    .AddPolicyHandler(GetRetryPolicy())           // ? Retry
-    .AddPolicyHandler(GetCircuitBreakerPolicy()); // ? Circuit breaker
+    .AddPolicyHandler(GetRetryPolicy())           // ✅ Retry
+    .AddPolicyHandler(GetCircuitBreakerPolicy()); // ✅ Circuit breaker
 
-// Retry Policy: 3 l?n, exponential backoff
+// Retry Policy: 3 lần, exponential backoff
 static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
 {
     return HttpPolicyExtensions
@@ -187,7 +187,7 @@ static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
         );
 }
 
-// Circuit Breaker: M? sau 5 failures, kh�a 30s
+// Circuit Breaker: Mở sau 5 failures, khóa 30s
 static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
 {
     return HttpPolicyExtensions
@@ -201,32 +201,32 @@ static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
 
 ---
 
-### 5?? **DATA ISOLATION & CONSISTENCY**
+### 5️⃣ **DATA ISOLATION & CONSISTENCY**
 
-#### ? **Y�U C?U:** M?i service c� database ri�ng
-**Hi?n tr?ng:**
+#### ✅ **YÊU CẦU:** Mỗi service có database riêng
+**Hiện trạng:**
 ```
-? IAM ? SRSS.IAM database
-? M?i service t? qu?n l� data
+✅ IAM → SRSS.IAM database
+✅ Mỗi service tự quản lý data
 ```
 
-#### ? **V?N ??:** Synchronous Database Transactions
+#### ❌ **VẤN ĐỀ:** Synchronous Database Transactions
 
 **Scenario:**
 ```
 User Register Flow:
-1. User registers ? IAM Service
+1. User registers → IAM Service
 2. Course Service needs to initialize user data
-3. C�ch hi?n t?i: G?i HTTP call (sync)
-4. N?u HTTP fail ? Partial data (inconsistent)
-5. Kh�ng c� distributed transaction
+3. Cách hiện tại: Gọi HTTP call (sync)
+4. Nếu HTTP fail → Partial data (inconsistent)
+5. Không có distributed transaction
 ```
 
-**V?n ??:**
-- ? Kh�ng c� event-driven architecture
-- ? Kh�ng c� message queue (RabbitMQ, Kafka)
-- ? Kh�ng c� Saga pattern (distributed transaction)
-- ? Data inconsistency
+**Vấn đề:**
+- ❌ Không có event-driven architecture
+- ❌ Không có message queue (RabbitMQ, Kafka)
+- ❌ Không có Saga pattern (distributed transaction)
+- ❌ Data inconsistency
 
 **Recommendation - Event-Driven Approach:**
 ```csharp
@@ -280,30 +280,30 @@ public class UserRegisteredEventConsumer : IConsumer<UserRegisteredEvent>
 
 ---
 
-### 6?? **LOGGING & OBSERVABILITY**
+### 6️⃣ **LOGGING & OBSERVABILITY**
 
-#### ?? **V?N ??:** Thi?u centralized logging
+#### ⚠️ **VẤN ĐỀ:** Thiếu centralized logging
 
-**Hi?n tr?ng:**
+**Hiện trạng:**
 ```csharp
 // SRSS.IAM.API\Program.cs
 builder.Logging.ClearProviders();
-builder.Logging.AddConsole();  // ? Console logging
-builder.Logging.AddDebug();    // ? Debug logging
+builder.Logging.AddConsole();  // ✅ Console logging
+builder.Logging.AddDebug();    // ✅ Debug logging
 ```
 
-**V?n ??:**
-- ?? Ch? log ra console/debug
-- ? Kh�ng c� centralized logging (ELK, Datadog)
-- ? Kh�ng c� correlation ID (tracing cross-services)
-- ? Kh�ng c� structured logging (JSON format)
+**Vấn đề:**
+- 🟡 Chỉ log ra console/debug
+- ❌ Không có centralized logging (ELK, Datadog)
+- ❌ Không có correlation ID (tracing cross-services)
+- ❌ Không có structured logging (JSON format)
 
 **Example:**
 ```
-Request A v�o Gateway ? Route t?i IAM Service ? Route t?i Course Service
-L�m sao trace request A across 3 services? ? C?n Correlation ID
+Request A vào Gateway → Route tới IAM Service → Route tới Course Service
+Làm sao trace request A across 3 services? → Cần Correlation ID
 
-M� hi?n t?i kh�ng c� ? Debugging nightmare!
+Mà hiện tại không có → Debugging nightmare!
 ```
 
 **Recommendation:**
@@ -315,7 +315,7 @@ builder.Services.AddLogging(config =>
     config.AddSerilog(new LoggerConfiguration()
         .MinimumLevel.Information()
         .WriteTo.Console()
-        .WriteTo.Seq("http://localhost:5341")  // ? Centralized logging
+        .WriteTo.Seq("http://localhost:5341")  // ✅ Centralized logging
         .Enrich.FromLogContext()
         .Enrich.WithProperty("Service", "IAM")
         .Enrich.WithProperty("Version", "1.0")
@@ -342,22 +342,22 @@ app.Use(async (context, next) =>
 
 ---
 
-### 7?? **HEALTH CHECKS & READINESS**
+### 7️⃣ **HEALTH CHECKS & READINESS**
 
-#### ? **V?N ??:** Kh�ng c� health check endpoints
+#### ❌ **VẤN ĐỀ:** Không có health check endpoints
 
-**Hi?n tr?ng:**
+**Hiện trạng:**
 ```
-? Kh�ng c� /health endpoint
-? Kh�ng c� liveness probe
-? Kh�ng c� readiness probe
-? Kh�ng th�ch h?p cho Kubernetes
+❌ Không có /health endpoint
+❌ Không có liveness probe
+❌ Không có readiness probe
+❌ Không thích hợp cho Kubernetes
 ```
 
-**V?n ??:**
-- ? Kubernetes kh�ng bi?t service alive hay kh�ng
-- ? Load balancer kh�ng bi?t instance n�o healthy
-- ? Downtime kh�ng ???c detect
+**Vấn đề:**
+- ❌ Kubernetes không biết service alive hay không
+- ❌ Load balancer không biết instance nào healthy
+- ❌ Downtime không được detect
 
 **Recommendation:**
 ```csharp
@@ -404,23 +404,23 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 ---
 
-### 8?? **CONTAINERIZATION & ORCHESTRATION**
+### 8️⃣ **CONTAINERIZATION & ORCHESTRATION**
 
-#### ? **Y�U C?U:** Docker support
-**Hi?n tr?ng:**
+#### ✅ **YÊU CẦU:** Docker support
+**Hiện trạng:**
 ```
-? C� Dockerfile cho t?ng service
-? Multi-stage build
-? Proper base image (.NET 8)
+✅ Có Dockerfile cho từng service
+✅ Multi-stage build
+✅ Proper base image (.NET 8)
 ```
 
-#### ? **V?N ??:** Thi?u Docker Compose & Kubernetes
+#### ❌ **VẤN ĐỀ:** Thiếu Docker Compose & Kubernetes
 
-**Hi?n tr?ng:**
+**Hiện trạng:**
 ```
-? docker-compose.yml tr?ng (empty)
-? Kh�ng c� Kubernetes manifests
-? Kh�ng c� environment-specific configs
+❌ docker-compose.yml trống (empty)
+❌ Không có Kubernetes manifests
+❌ Không có environment-specific configs
 ```
 
 **docker-compose.yml (Recommendation):**
@@ -516,7 +516,7 @@ metadata:
   name: iam-service
   namespace: default
 spec:
-  replicas: 3  # ? Scale to 3 instances
+  replicas: 3  # ✅ Scale to 3 instances
   selector:
     matchLabels:
       app: iam-service
@@ -534,7 +534,7 @@ spec:
         envFrom:
         - configMapRef:
             name: iam-config
-        livenessProbe:  # ? Service is alive
+        livenessProbe:  # ✅ Service is alive
           httpGet:
             path: /health/live
             port: 8080
@@ -542,7 +542,7 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
-        readinessProbe:  # ? Service ready to serve
+        readinessProbe:  # ✅ Service ready to serve
           httpGet:
             path: /health/ready
             port: 8080
@@ -550,7 +550,7 @@ spec:
           periodSeconds: 5
           timeoutSeconds: 3
           failureThreshold: 2
-        resources:  # ? Resource limits
+        resources:  # ✅ Resource limits
           requests:
             memory: "256Mi"
             cpu: "250m"
@@ -571,32 +571,32 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 8080
-  type: ClusterIP  # ? Internal service discovery
+  type: ClusterIP  # ✅ Internal service discovery
 ```
 
 ---
 
-### 9?? **CONFIGURATION MANAGEMENT**
+### 9️⃣ **CONFIGURATION MANAGEMENT**
 
-#### ?? **V?N ??:** Hard-coded Secrets
+#### 🔴 **VẤN ĐỀ:** Hard-coded Secrets
 
-**Hi?n tr?ng:**
+**Hiện trạng:**
 ```json
 {
   "JwtSettings": {
-    "secretKey": "DhftOS5uphK3vmCJQrexST1RsyjZBjXWRgJMFPU4"  // ? Hard-coded!
+    "secretKey": "DhftOS5uphK3vmCJQrexST1RsyjZBjXWRgJMFPU4"  // ❌ Hard-coded!
   },
   "ConnectionStrings": {
-    "SRSS_IAM_DB": "Server=.;uid=sa;pwd=12345"  // ? Hard-coded!
+    "SRSS_IAM_DB": "Server=.;uid=sa;pwd=12345"  // ❌ Hard-coded!
   }
 }
 ```
 
-**V?n ??:**
-- ?? Secrets trong source code
-- ?? Credentials visible ? Security breach
-- ? Kh� qu?n l� across environments
-- ? Kh�ng th�ch h?p cho production
+**Vấn đề:**
+- 🔴 Secrets trong source code
+- 🔴 Credentials visible → Security breach
+- ❌ Khó quản lý across environments
+- ❌ Không thích hợp cho production
 
 **Recommendation:**
 
@@ -620,8 +620,8 @@ var environment = builder.Environment.EnvironmentName;
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false)
     .AddJsonFile($"appsettings.{environment}.json", optional: true)
-    .AddEnvironmentVariables()  // ? Support environment variables
-    .AddUserSecrets<Program>(optional: true);  // ? Local secrets
+    .AddEnvironmentVariables()  // ✅ Support environment variables
+    .AddUserSecrets<Program>(optional: true);  // ✅ Local secrets
 
 // Production: Load from Azure Key Vault / AWS Secrets Manager
 if (app.Environment.IsProduction())
@@ -648,16 +648,16 @@ environment:
 
 ---
 
-### ?? **API VERSIONING**
+### 🔟 **API VERSIONING**
 
-#### ? **V?N ??:** Kh�ng c� API versioning strategy
+#### ❌ **VẤN ĐỀ:** Không có API versioning strategy
 
-**Hi?n tr?ng:**
+**Hiện trạng:**
 ```
-? Kh�ng c� /v1/, /v2/ prefixes
-? Kh�ng c� versioning header
-? Kh�ng c� deprecation policy
-? Breaking changes s? l� v?n ??
+❌ Không có /v1/, /v2/ prefixes
+❌ Không có versioning header
+❌ Không có deprecation policy
+❌ Breaking changes sẽ là vấn đề
 ```
 
 **Recommendation:**
@@ -701,27 +701,27 @@ public class AuthV2Controller : ControllerBase
 
 ---
 
-## ?? MICROSERVICE COMPLIANCE SCORECARD
+## 📊 MICROSERVICE COMPLIANCE SCORECARD
 
-| Ti�u ch� | Status | Score | Notes |
+| Tiêu chí | Status | Score | Notes |
 |----------|--------|-------|-------|
-| Service Independence | ?? Partial | 70% | Database ri�ng ?, Secret key chia s? ? |
-| API Gateway | ? Good | 75% | YARP setup ?, Hardcoded URLs ?, No LB ? |
-| Authentication | ? Good | 80% | JWT ?, Secret shared ?, No service key ? |
-| Service Communication | ? Missing | 0% | No HttpClient, No Polly, No circuit breaker |
-| Data Isolation | ? Good | 85% | Separate DB ?, No event-driven ? |
-| Logging | ?? Partial | 40% | Console ?, No centralized ?, No correlation ID ? |
-| Health Checks | ? Missing | 0% | No endpoints, Not K8s ready |
-| Containerization | ? Good | 90% | Docker ?, No compose ? |
-| Config Management | ? Poor | 10% | Hard-coded secrets ?, No secret mgmt |
-| API Versioning | ? Missing | 0% | No versioning strategy |
-| **TOTAL** | **?? PARTIAL** | **55%** | **C?n improvements** |
+| Service Independence | ⚠️ Partial | 70% | Database riêng ✅, Secret key chia sẻ ❌ |
+| API Gateway | ✅ Good | 75% | YARP setup ✅, Hardcoded URLs ❌, No LB ❌ |
+| Authentication | ✅ Good | 80% | JWT ✅, Secret shared ❌, No service key ❌ |
+| Service Communication | ❌ Missing | 0% | No HttpClient, No Polly, No circuit breaker |
+| Data Isolation | ✅ Good | 85% | Separate DB ✅, No event-driven ❌ |
+| Logging | ⚠️ Partial | 40% | Console ✅, No centralized ❌, No correlation ID ❌ |
+| Health Checks | ❌ Missing | 0% | No endpoints, Not K8s ready |
+| Containerization | ✅ Good | 90% | Docker ✅, No compose ❌ |
+| Config Management | ❌ Poor | 10% | Hard-coded secrets ❌, No secret mgmt |
+| API Versioning | ❌ Missing | 0% | No versioning strategy |
+| **TOTAL** | **⚠️ PARTIAL** | **55%** | **Cần improvements** |
 
 ---
 
-## ?? CRITICAL ISSUES TO FIX
+## 🚨 CRITICAL ISSUES TO FIX
 
-### ?? **P1 - SECURITY (FIX IMMEDIATELY)**
+### 🔴 **P1 - SECURITY (FIX IMMEDIATELY)**
 
 1. **Hard-coded Secrets in appsettings.json**
    - Location: `appsettings.json` - JWT secret, DB password
@@ -739,10 +739,10 @@ public class AuthV2Controller : ControllerBase
 
 ---
 
-### ?? **P2 - HIGH PRIORITY**
+### 🟠 **P2 - HIGH PRIORITY**
 
 4. **No Service-to-Service Communication Pattern**
-   - When Course needs to call IAM ? ???
+   - When Course needs to call IAM → ???
    - Solution: HttpClient + Polly (Circuit Breaker + Retry)
    - Timeline: **Next 2 weeks**
 
@@ -766,7 +766,7 @@ public class AuthV2Controller : ControllerBase
 
 ---
 
-### ?? **P3 - MEDIUM PRIORITY**
+### 🟡 **P3 - MEDIUM PRIORITY**
 
 9. **No Centralized Logging**
    - Solution: Serilog + Seq/ELK
@@ -779,7 +779,7 @@ public class AuthV2Controller : ControllerBase
     - Timeline: **Week 3**
 
 12. **No docker-compose**
-    - Kh� setup local dev
+    - Khó setup local dev
     - Timeline: **Week 2**
 
 13. **No Kubernetes manifests**
@@ -788,7 +788,7 @@ public class AuthV2Controller : ControllerBase
 
 ---
 
-## ?? RECOMMENDED MIGRATION PLAN
+## 📝 RECOMMENDED MIGRATION PLAN
 
 ### **PHASE 1: Security & Basics (Week 1-2)**
 - [ ] Move secrets to environment variables / Key Vault
@@ -825,22 +825,22 @@ public class AuthV2Controller : ControllerBase
 
 ---
 
-## ? WHAT'S WORKING WELL
+## ✅ WHAT'S WORKING WELL
 
-1. ? **Database Separation** - Each service has own DB
-2. ? **API Gateway Pattern** - YARP is good choice
-3. ? **JWT Authentication** - Proper implementation
-4. ? **Docker Support** - Multi-stage builds
-5. ? **Dependency Injection** - Clean DI setup
-6. ? **Exception Handling** - Global exception middleware
-7. ? **JWT Blacklisting** - Redis implementation good
-8. ? **Entity Framework** - Proper ORM usage
-9. ? **Unit of Work Pattern** - Good repository pattern
-10. ? **Configuration** - Structured config approach
+1. ✅ **Database Separation** - Each service has own DB
+2. ✅ **API Gateway Pattern** - YARP is good choice
+3. ✅ **JWT Authentication** - Proper implementation
+4. ✅ **Docker Support** - Multi-stage builds
+5. ✅ **Dependency Injection** - Clean DI setup
+6. ✅ **Exception Handling** - Global exception middleware
+7. ✅ **JWT Blacklisting** - Redis implementation good
+8. ✅ **Entity Framework** - Proper ORM usage
+9. ✅ **Unit of Work Pattern** - Good repository pattern
+10. ✅ **Configuration** - Structured config approach
 
 ---
 
-## ?? REFERENCE LINKS
+## 🔗 REFERENCE LINKS
 
 **Service Communication & Resilience:**
 - Polly: https://github.com/App-vNext/Polly

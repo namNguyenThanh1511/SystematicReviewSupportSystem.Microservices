@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Shared.Cache;
+using Shared.Middlewares;
+using Shared.Models;
 using SRSS.IAM.API.DependencyInjection.Extensions;
-using SRSS.IAM.API.Middlewares;
-using SRSS.IAM.API.Models;
 using SRSS.IAM.Repositories;
-using StackExchange.Redis;
 
 namespace SRSS.IAM.API
 {
@@ -40,11 +40,7 @@ namespace SRSS.IAM.API
                 options.UseSqlServer(connectionString));
 
             // Redis connection
-            builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-            {
-                var redisConnection = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
-                return ConnectionMultiplexer.Connect(redisConnection);
-            });
+            builder.Services.AddRedisCacheWithHealthCheck(builder.Configuration);
 
             builder.Services.AddApplicationServices(builder.Configuration);
 

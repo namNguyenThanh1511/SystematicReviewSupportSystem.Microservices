@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using SRSS.IAM.API.Middlewares;
+using Shared.Cache;
+using Shared.Middlewares;
 using SRSS.IAM.Repositories.Entities;
 using SRSS.IAM.Repositories.UnitOfWork;
 using SRSS.IAM.Services.AuthService;
-using SRSS.IAM.Services.CacheService;
 using SRSS.IAM.Services.Configurations;
 using SRSS.IAM.Services.JWTService;
 using SRSS.IAM.Services.RefreshTokenService;
@@ -26,7 +26,7 @@ namespace SRSS.IAM.API.DependencyInjection.Extensions
             services.AddSignalR();
             services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
             // ✅ Register repositories first
-            services.AddScoped<IRedisService, RedisService>();
+            services.AddScoped<IRedisCacheService, RedisCacheService>();
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();

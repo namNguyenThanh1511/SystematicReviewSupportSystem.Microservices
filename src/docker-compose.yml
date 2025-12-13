@@ -36,6 +36,10 @@ services:
       - ConnectionStrings__SRSS_IAM_DB=Server=host.docker.internal;Database=SRSS.IAM;User Id=sa;Password=12345;TrustServerCertificate=True;
     networks:
       - proxybackend
+  redis:
+    image: redis:7-alpine
+    ports:
+    - "6379:6379"
   api-gateway:
     build:
       context: .

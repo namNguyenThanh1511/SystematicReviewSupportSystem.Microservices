@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
-using SRSS.IAM.API.Builder;
-using SRSS.IAM.API.Models;
-using SRSS.IAM.Services.Exceptions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Shared.Builder;
+using Shared.Exceptions;
+using Shared.Models;
 using System.Net;
 using System.Text.Json;
 
-namespace SRSS.IAM.API.Middlewares
+namespace Shared.Middlewares
 {
     public class GlobalExceptionMiddleware : IExceptionHandler
     {
@@ -33,9 +35,9 @@ namespace SRSS.IAM.API.Middlewares
                 response = statusCode switch
                 {
                     400 => ResponseBuilder.BadRequest("Yêu cầu không hợp lệ ", errors),
-                    //401 => ResponseBuilder.Unauthorized("Lacked valid authentication credentials ", errors),
+                    401 => ResponseBuilder.Unauthorized(domainEx.Message),
                     403 => ResponseBuilder.Forbidden(domainEx.Message),
-                    //404 => ResponseBuilder.NotFound(domainEx.Message),
+                    404 => ResponseBuilder.NotFound(domainEx.Message),
                     _ => ResponseBuilder.Error(domainEx.Message)
                 };
             }

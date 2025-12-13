@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SRSS.IAM.API.Builder;
-using SRSS.IAM.API.Models;
+using Shared.Builder;
+using Shared.Models;
 
 namespace SRSS.IAM.API.Controllers
 {
