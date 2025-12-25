@@ -28,7 +28,8 @@ spec:
               protocol: TCP
           volumeMounts:
             - name: config-volume
-              mountPath: /app/config
+              mountPath: /app/appsettings.Production.json
+              subPath: appsettings.Production.json
       volumes:
         - name: config-volume
           configMap:
