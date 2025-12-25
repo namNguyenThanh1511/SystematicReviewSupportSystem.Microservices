@@ -9,6 +9,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddJsonFile("config/appsettings.Production.json", optional: true, reloadOnChange: true);
+
 // =================== 🔐 AUTHENTICATION SETUP ===================
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
@@ -30,7 +32,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         )
     };
 });
-
 
 builder.Services
     .AddAuthentication(BearerTokenDefaults.AuthenticationScheme)

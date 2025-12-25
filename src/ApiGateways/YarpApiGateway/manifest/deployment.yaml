@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: srss-gateway
+  namespace: amayakuro
+spec:
+  selector:
+    matchLabels:
+      srss: gateway
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        srss: gateway
+    spec:
+      containers:
+        - name: srss-gateway
+          image: ghcr.io/namnguyenthanh1511/yarp-api-gateway:latest
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "2"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: srss-gateway
+
+      topologySpreadConstraints:
+        - maxSkew: 2
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              topology.kubernetes.io/zone: sgmy
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: topology.kubernetes.io/zone
+                operator: In
+                values:
+                - sgmy

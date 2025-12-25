@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: srss-iam
+  namespace: amayakuro
+data:
+  appsettings.Production.json: |-
+    "ConnectionStrings": {
+      "SRSS_IAM_DB": "Server=srss-iam-db.amayakuro.svc.cluster.local;Database=SRSS.IAM;TrustServerCertificate=True;uid=sa;pwd=U0VDUkVUX1BBLMAOU1NXT1JE",
+      "Redis": "localhost:6379,allowAdmin=true,connectTimeout=10000,syncTimeout=10000,asyncTimeout=10000,connectRetry=5,abortConnect=false,keepAlive=60"
+    }
+  MSSQL_SA_PASSWORD: U0VDUkVUX1BBLMAOU1NXT1JE

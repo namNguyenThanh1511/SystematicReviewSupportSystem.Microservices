@@ -16,6 +16,8 @@ namespace SRSS.IAM.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Configuration.AddJsonFile("config/appsettings.Production.json", optional: true, reloadOnChange: true);
+            
             // Add services to the container.
             //DotNetEnv.Env.Load();
 

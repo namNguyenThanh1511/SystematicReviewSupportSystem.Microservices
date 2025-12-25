@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: srss-iam
+  namespace: amayakuro
+spec:
+  serviceName: "srss-iam"
+  selector:
+    matchLabels:
+      srss: iam
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        srss: iam
+    spec:
+      containers:
+        - name: srss-iam
+          image: ghcr.io/namnguyenthanh1511/srss-iam-api:latest
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "2"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: srss-iam
+            items:
+              - key: appsettings.Production.json
+                path: appsettings.Production.json
+
+      topologySpreadConstraints:
+        - maxSkew: 2
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              topology.kubernetes.io/zone: sgmy
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/zone
+                    operator: In
+                    values:
+                      - sgmy
