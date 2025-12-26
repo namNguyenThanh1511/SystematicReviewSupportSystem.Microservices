@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Google.Apis.Auth;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Shared.Cache;
 using Shared.Exceptions;
@@ -21,8 +22,9 @@ namespace SRSS.IAM.Services.AuthService
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly JwtSettings _jwtSettings;
         private readonly IRedisCacheService _redisService;
+        private readonly GoogleAuthSettings _googleAuthSettings;
 
-        public AuthService(IUnitOfWork unitOfWork, IPasswordHasher<User> passwordHasher, IJwtService jwtService, IRefreshTokenService refreshTokenService, IOptions<JwtSettings> jwtSettings, IRedisCacheService redisService)
+        public AuthService(IUnitOfWork unitOfWork, IPasswordHasher<User> passwordHasher, IJwtService jwtService, IRefreshTokenService refreshTokenService, IOptions<JwtSettings> jwtSettings, IRedisCacheService redisService, IOptions<GoogleAuthSettings> googleAuthSettings)
         {
             _unitOfWork = unitOfWork;
             _passwordHasher = passwordHasher;
@@ -30,6 +32,7 @@ namespace SRSS.IAM.Services.AuthService
             _refreshTokenService = refreshTokenService;
             _jwtSettings = jwtSettings.Value;
             _redisService = redisService;
+            _googleAuthSettings = googleAuthSettings.Value;
         }
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
@@ -94,6 +97,49 @@ namespace SRSS.IAM.Services.AuthService
             };
             await _unitOfWork.Users.AddAsync(newUser);
             await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<LoginResponse> GoogleLoginAsync(GoogleLoginRequest request)
+        {
+            try
+            {
+                // Validate the Google ID token
+                var payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken, new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { _googleAuthSettings.ClientId }
+                });
+
+                // Check if user exists by Google ID or email
+                var user = await _unitOfWork.Users.FindSingleAsync(u => 
+                    u.Email.ToLower() == payload.Email.ToLower());
+
+                if (user == null)
+                {
+                    // Create new user from Google profile - DO NOT UPDATE DB
+                    user = new User
+                    {
+                        FullName = payload.Name,
+                        Email = payload.Email,
+                        Username = payload.Email.Split('@')[0], // Use email prefix as username
+                        Role = Role.Client,
+                        IsActive = true,
+                        Password = null // Google users don't have passwords
+                    };
+                }
+                else if (!user.IsActive)
+                {
+                    throw new ForbiddenException("Tài khoản đã bị vô hiệu hóa");
+                }
+
+                // Generate access token
+                var accessToken = _jwtService.GenerateAccessToken(user);
+                
+                return CreateLoginResponse(user, accessToken);
+            }
+            catch (InvalidJwtException)
+            {
+                throw new UnauthorizedException("Invalid Google ID token");
+            }
         }
 
 

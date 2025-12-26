@@ -40,6 +40,14 @@ namespace SRSS.IAM.API.Controllers
 
         }
 
+        [HttpPost("google-login")]
+        public async Task<ActionResult<ApiResponse<LoginResponse>>> GoogleLogin([FromBody] GoogleLoginRequest request)
+        {
+            var result = await _authService.GoogleLoginAsync(request);
+            await IssueRefreshTokenAsync(result.UserId);
+            return Ok(result, "Đăng nhập bằng Google thành công");
+        }
+
         [HttpPost("refresh")]
         public async Task<ActionResult<ApiResponse<LoginResponse>>> RefreshToken()
         {
