@@ -25,7 +25,7 @@ namespace SRSS.IAM.API.DependencyInjection.Extensions
 
             services.AddSignalR();
             services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
-            services.Configure<GoogleAuthSettings>(configuration.GetSection("GoogleAuthSettings"));
+            services.Configure<GoogleAuthSettings>(configuration.GetSection(GoogleAuthSettings.SectionName));
             // ✅ Register repositories first
             services.AddScoped<IRedisCacheService, RedisCacheService>();
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
