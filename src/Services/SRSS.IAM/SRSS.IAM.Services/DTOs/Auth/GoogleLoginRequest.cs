@@ -4,7 +4,7 @@ namespace SRSS.IAM.Services.DTOs.Auth
 {
     public class GoogleLoginRequest
     {
-        [Required(ErrorMessage = "Google ID Token is required")]
+        [Required(ErrorMessage = "Google IdToken is required")]
         public string IdToken { get; set; }
     }
 }

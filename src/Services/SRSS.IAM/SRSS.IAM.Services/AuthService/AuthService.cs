@@ -99,11 +99,12 @@ namespace SRSS.IAM.Services.AuthService
             await _unitOfWork.SaveChangesAsync();
         }
 
+
         public async Task<LoginResponse> GoogleLoginAsync(GoogleLoginRequest request)
         {
             try
             {
-                // Validate the Google ID token
+                // Validate the Google IdToken
                 var payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken, new GoogleJsonWebSignature.ValidationSettings
                 {
                     Audience = new[] { _googleAuthSettings.ClientId }
@@ -148,6 +149,28 @@ namespace SRSS.IAM.Services.AuthService
             }
         }
 
+        public async Task<GoogleOAuthUrlResponse> GenerateGoogleOAuthUrlAsync(GoogleOAuthUrlRequest request)
+        {
+            // Build the Google OAuth 2.0 authorization URL
+            var state = Guid.NewGuid().ToString(); // Generate a unique state parameter for security
+            var scope = Uri.EscapeDataString(_googleAuthSettings.Scope);
+            var redirectUri = Uri.EscapeDataString(request.RedirectUrl);
+            var clientId = Uri.EscapeDataString(_googleAuthSettings.ClientId);
+
+            var url = $"{_googleAuthSettings.AuthorizationEndpoint}" +
+                      $"?client_id={clientId}" +
+                      $"&redirect_uri={redirectUri}" +
+                      $"&response_type=code" +
+                      $"&scope={scope}" +
+                      $"&access_type=offline" +
+                      $"&prompt=consent" +
+                      $"&state={state}";
+
+            return await Task.FromResult(new GoogleOAuthUrlResponse
+            {
+                Url = url
+            });
+        }
 
         public async Task<LoginResponse> RefreshAsync(Guid userId)
         {
