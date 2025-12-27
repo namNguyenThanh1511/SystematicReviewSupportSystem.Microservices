@@ -110,12 +110,11 @@ namespace SRSS.IAM.Services.AuthService
                 });
 
                 // Check if user exists by Google ID or email
-                var user = await _unitOfWork.Users.FindSingleAsync(u => 
+                var user = await _unitOfWork.Users.FindSingleAsync(u =>
                     u.Email.ToLower() == payload.Email.ToLower());
 
                 if (user == null)
                 {
-                    // Create new user from Google profile - DO NOT UPDATE DB
                     user = new User
                     {
                         FullName = payload.Name,
@@ -123,8 +122,15 @@ namespace SRSS.IAM.Services.AuthService
                         Username = payload.Email.Split('@')[0], // Use email prefix as username
                         Role = Role.Client,
                         IsActive = true,
-                        Password = null // Google users don't have passwords
+                        Password = null
                     };
+
+                    await _unitOfWork.Users.AddAsync(user);
+                    // Create user failed if no write happened 
+                    if (await _unitOfWork.SaveChangesAsync() == 0)
+                    {
+                        throw new Exception("Lỗi khi đăng kí người dùng với Google Oauth2");
+                    }
                 }
                 else if (!user.IsActive)
                 {
@@ -133,7 +139,7 @@ namespace SRSS.IAM.Services.AuthService
 
                 // Generate access token
                 var accessToken = _jwtService.GenerateAccessToken(user);
-                
+
                 return CreateLoginResponse(user, accessToken);
             }
             catch (InvalidJwtException)
