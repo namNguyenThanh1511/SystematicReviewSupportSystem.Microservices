@@ -19,13 +19,16 @@ spec:
           resources:
             requests:
               memory: "512Mi"
-              cpu: "500m"
+              cpu: "1"
             limits:
               memory: "1Gi"
-              cpu: "2"
+              cpu: "4"
           ports:
             - containerPort: 8080
               protocol: TCP
+          env:
+            - name: DOTNET_USE_POLLING_FILE_WATCHER
+              value: "true"
           volumeMounts:
             - name: config-volume
               mountPath: /app/appsettings.Production.json
@@ -46,8 +49,8 @@ spec:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-            - matchExpressions:
-              - key: topology.kubernetes.io/zone
-                operator: In
-                values:
-                - sgmy
+              - matchExpressions:
+                  - key: topology.kubernetes.io/zone
+                    operator: In
+                    values:
+                      - sgmy
