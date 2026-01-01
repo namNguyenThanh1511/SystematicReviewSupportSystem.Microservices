@@ -18,9 +18,6 @@ spec:
         - name: mssql # container name within the pod.
           image: mcr.microsoft.com/mssql/server:2022-latest
           resources:
-            requests:
-              memory: "1Gi"
-              cpu: "500m"
             limits:
               memory: "2Gi"
               cpu: "2"
