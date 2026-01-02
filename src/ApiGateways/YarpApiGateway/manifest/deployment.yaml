@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: srss-gateway
-          image: ghcr.io/namnguyenthanh1511/yarp-api-gateway:Latest
+          image: ghcr.io/namnguyenthanh1511/yarp-api-gateway:latest
           resources:
             requests:
               memory: "512Mi"
