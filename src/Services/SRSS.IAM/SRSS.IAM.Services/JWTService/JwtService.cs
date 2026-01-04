@@ -41,8 +41,8 @@ namespace SRSS.IAM.Services.JWTService
                         ClaimValueTypes.Integer64)
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
-                Issuer = _jwtSettings.Issuer,
-                Audience = _jwtSettings.Audience,
+                Issuer = _jwtSettings.ValidIssuer,
+                Audience = _jwtSettings.ValidAudience,
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey)),
                     SecurityAlgorithms.HmacSha256Signature)
@@ -80,8 +80,8 @@ namespace SRSS.IAM.Services.JWTService
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = _jwtSettings.Issuer,
-                ValidAudience = _jwtSettings.Audience,
+                ValidIssuer = _jwtSettings.ValidIssuer,
+                ValidAudience = _jwtSettings.ValidAudience,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey)),
                 ClockSkew = TimeSpan.Zero // Remove default 5 minute tolerance
             };

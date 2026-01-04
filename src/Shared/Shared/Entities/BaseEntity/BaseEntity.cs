@@ -1,4 +1,4 @@
-﻿namespace SRSS.IAM.Repositories.Entities.BaseEntity
+﻿namespace Shared.Entities.BaseEntity
 {
     public abstract class BaseEntity<T> : IBaseEntity<T>
     {

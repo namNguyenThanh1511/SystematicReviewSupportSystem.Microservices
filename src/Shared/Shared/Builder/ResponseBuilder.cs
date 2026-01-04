@@ -97,6 +97,15 @@ namespace Shared.Builder
             return Error(message);
         }
 
+        public static ApiResponse<T> Conflict<T>(string message = "Xung đột dữ liệu")
+        {
+            return Error<T>(message);
+        }
+        public static ApiResponse Conflict(string message = "Xung đột dữ liệu", List<ApiError>? errors = null)
+        {
+            return Error(message, errors);
+        }
+
 
         // Validation error response
         public static ApiResponse ValidationError(ModelStateDictionary modelState, string message = "Dữ liệu không hợp lệ")

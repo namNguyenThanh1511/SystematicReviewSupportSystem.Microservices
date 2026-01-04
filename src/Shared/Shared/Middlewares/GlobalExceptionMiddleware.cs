@@ -38,6 +38,8 @@ namespace Shared.Middlewares
                     401 => ResponseBuilder.Unauthorized(domainEx.Message),
                     403 => ResponseBuilder.Forbidden(domainEx.Message),
                     404 => ResponseBuilder.NotFound(domainEx.Message),
+                    409 => ResponseBuilder.Conflict(domainEx.Message, errors),
+                    429 => ResponseBuilder.Error("Quá nhiều yêu cầu. Vui lòng thử lại sau.", errors),
                     _ => ResponseBuilder.Error(domainEx.Message)
                 };
             }

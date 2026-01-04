@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Shared.Cache;
+using Shared.DependencyInjection;
 using Shared.Middlewares;
 using SRSS.IAM.Repositories.Entities;
 using SRSS.IAM.Repositories.UnitOfWork;
@@ -11,8 +11,6 @@ using SRSS.IAM.Services.Configurations;
 using SRSS.IAM.Services.JWTService;
 using SRSS.IAM.Services.RefreshTokenService;
 using SRSS.IAM.Services.UserService;
-using Swashbuckle.AspNetCore.Filters;
-using System.Reflection;
 using System.Text;
 
 namespace SRSS.IAM.API.DependencyInjection.Extensions
@@ -25,8 +23,8 @@ namespace SRSS.IAM.API.DependencyInjection.Extensions
 
             services.AddSignalR();
             services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
-            // ✅ Register repositories first
-            services.AddScoped<IRedisCacheService, RedisCacheService>();
+        
+
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -52,29 +50,10 @@ namespace SRSS.IAM.API.DependencyInjection.Extensions
             });
         }
 
-        public static void ConfigureSwaggerForAuthentication(this IServiceCollection services)
+        public static IServiceCollection ConfigureSwaggerForAuthentication(this IServiceCollection services)
         {
-            services.AddSwaggerGen(options =>
-            {
-                options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-                {
-                    Description =
-                        "JWT Authorization header using the Bearer scheme. \r\n\r\n" +
-                        "Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\n" +
-                        "Example: \"Bearer [token]\"",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Scheme = JwtBearerDefaults.AuthenticationScheme,
-                    Type = SecuritySchemeType.Http,
-                    BearerFormat = "JWT",
-                });
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "SRSS", Version = "v1" });
-                options.OperationFilter<SecurityRequirementsOperationFilter>();
-                //**Main project's XML docs
-                var apiXml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var apiXmlPath = Path.Combine(AppContext.BaseDirectory, apiXml);
-                options.IncludeXmlComments(apiXmlPath, includeControllerXmlComments: true);
-            });
+            services.AddSwaggerGenForAuthentication();
+            return services;
         }
 
         public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
@@ -95,8 +74,8 @@ namespace SRSS.IAM.API.DependencyInjection.Extensions
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSettings["validIssuer"],
-                    ValidAudience = jwtSettings["validAudience"],
+                    ValidIssuer = jwtSettings["ValidIssuer"],
+                    ValidAudience = jwtSettings["ValidAudience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
                 };
             });

@@ -1,48 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.BearerToken;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
-using System.Security.Claims;
-using System.Text;
+using Shared.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
 // =================== 🔐 AUTHENTICATION SETUP ===================
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-
-        ValidIssuer = builder.Configuration["JwtSettings:validIssuer"],   // ✅ SRSSAPI
-        ValidAudience = builder.Configuration["JwtSettings:validAudience"], // ✅ SRSSClient
-
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(
-                builder.Configuration["JwtSettings:secretKey"]!
-            )
-        )
-    };
-});
-
-
-builder.Services
-    .AddAuthentication(BearerTokenDefaults.AuthenticationScheme)
-    .AddBearerToken();
-
-
-// =================== ✅ ROLE-BASED AUTHORIZATION ===================
-builder.Services.AddAuthorizationBuilder()
-                        .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"))
-                        .AddPolicy("ManagerOnly", policy => policy.RequireRole("Manager"));
-
-//builder.Services.AddAuthorization();
+builder.Services.AddJwtAuthenticationScheme(configuration);
 
 // =================== 🌐 YARP & SWAGGER ===================
 builder.Services.AddReverseProxy()
@@ -89,35 +53,37 @@ app.UseSwagger(c =>
 
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/iam/swagger/v1/swagger.json", "IAM Service v1");
+    options.SwaggerEndpoint("/swagger/iam/swagger/v1/swagger.json", "IAM Service v1");
+    options.SwaggerEndpoint("/swagger/project/swagger/v1/swagger.json", "Project Service v1");
     options.RoutePrefix = string.Empty;
 });
 
+
 app.UseRouting();
 
-app.UseCors();           // ✅ CORS TRƯỚC AUTH
-app.UseRateLimiter();   // ✅ Rate limit sau routing
+app.UseCors();
+app.UseRateLimiter();
 
 app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapGet("login", (bool firstApi = false, bool secondApi = false) => //for testing
-    Results.SignIn(
-        new ClaimsPrincipal(
-            new ClaimsIdentity(
-                [
-                    new Claim("sub", Guid.NewGuid().ToString()),
-                    //new Claim("first-api-access", firstApi.ToString()),
-                    //new Claim("second-api-access", secondApi.ToString())
-                ],
-                BearerTokenDefaults.AuthenticationScheme)),
-        authenticationScheme: BearerTokenDefaults.AuthenticationScheme));
+//app.UseAuthorization();
 
 app.MapReverseProxy(proxyPipeline =>
 {
     proxyPipeline.Use(async (context, next) =>
     {
         var path = context.Request.Path.Value!.ToLower();
+
+        if (context.Request.Path.StartsWithSegments("/swagger"))
+        {
+            await next();
+            return;
+        }
+
+        if (path.Contains("/swagger"))
+        {
+            await next();
+            return;
+        }
 
         // ✅ IAM → public
         if (path.StartsWith("/iam"))
@@ -126,20 +92,11 @@ app.MapReverseProxy(proxyPipeline =>
             return;
         }
 
-        // ✅ Mặc định: phải login
-        var authResult = await context.AuthenticateAsync();
-        if (!authResult.Succeeded)
+        if (!context.User.Identity?.IsAuthenticated ?? true)
         {
             context.Response.StatusCode = 401;
             return;
         }
-
-        // ✅ Project → AdminOnly
-        //if (path.StartsWith("/project") && !context.User.IsInRole("Admin"))
-        //{
-        //    context.Response.StatusCode = 403;
-        //    return;
-        //}
 
         await next();
     });
