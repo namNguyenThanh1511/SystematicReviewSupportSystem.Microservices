@@ -6,6 +6,14 @@ metadata:
 data:
   appsettings.Production.json: |-
     {
+      "JwtSettings": {
+        "ValidIssuer": "SRSS",
+        "ValidAudience": "SRSSUsers",
+        "ValidateAudience": true,
+        "AccessTokenExpirationMinutes": 15,
+        "RefreshTokenExpirationDays": 30,
+        "secretKey": "DhftOS5uphK3vmCJQrexST1RsyjZBjXWRgJMFPU4"
+      },
       "ConnectionStrings": {
         "SRSS_IAM_DB": "Server=srss-iam-db-service.amayakuro.svc.cluster.local;Database=SRSS.IAM;TrustServerCertificate=True;uid=sa;pwd=U0VDUkVUX1BBLMAOU1NXT1JE",
         "Redis": "redis-service.amayakuro.svc.cluster.local:6379,allowAdmin=true,connectTimeout=10000,syncTimeout=10000,asyncTimeout=10000,connectRetry=5,abortConnect=false,keepAlive=60"
@@ -17,4 +25,3 @@ data:
         "Scope": "openid profile email"
       }
     }
-  MSSQL_SA_PASSWORD: U0VDUkVUX1BBLMAOU1NXT1JE

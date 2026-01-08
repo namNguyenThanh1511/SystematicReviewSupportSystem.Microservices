@@ -25,6 +25,11 @@ jobs:
                  dockerfile: ./src/Services/SRSS.IAM/SRSS.IAM.API/Dockerfile
                  image_name: srss-iam-api
 
+               - service: project-service
+                 context: ./src
+                 dockerfile: ./src/Services/SRSS.Project/SRSS.Project.API/Dockerfile
+                 image_name: srss-project-api
+
                # - service: test-service
                #   context: ./src
                #   dockerfile: ./src/Services/SRSS.TestGateways/SRSS.TestGateways.API/Dockerfile

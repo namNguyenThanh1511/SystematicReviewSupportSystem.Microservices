@@ -1,50 +1,42 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: srss-iam-db
+  name: srss-project-db
   namespace: amayakuro
 data:
-  MSSQL_SA_PASSWORD: U0VDUkVUX1BBLMAOU1NXT1JE
+  POSTGRES_DB: SRSS.Project
+  POSTGRES_PASSWORD: U0VDUkVUX1BBLMAOU1NXT1JE
 
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: srss-iam-db
+  name: srss-project-db
   namespace: amayakuro
 spec:
-  serviceName: "srss-iam-db"
+  serviceName: "srss-project-db"
   selector:
     matchLabels:
-      srss: iam-db
+      srss: project-db
   replicas: 1
   template:
     metadata:
       labels:
-        srss: iam-db
+        srss: project-db
     spec:
       containers:
-        - name: mssql # container name within the pod.
-          image: mcr.microsoft.com/mssql/server:2022-latest
+        - name: postgres # container name within the pod.
+          image: postgres:18
           resources:
             limits:
               memory: "2Gi"
               cpu: "2"
           ports:
-          - containerPort: 1433
-            name: tcpsql
-          env:
-            - name: ACCEPT_EULA
-              value: "Y"
-            - name: MSSQL_ENABLE_HADR
-              value: "1"
-            - name: MSSQL_AGENT_ENABLED
-              value: "1"
-            - name: MSSQL_SA_PASSWORD
-              valueFrom:
-                configMapKeyRef:
-                  name: srss-iam-db
-                  key: MSSQL_SA_PASSWORD
+          - containerPort: 5432
+            name: tcppostgres
+          envFrom:
+            - configMapRef:
+              name: srss-project-db
             # volumeMounts:
             # - name: srss
             #   mountPath: "/var/opt/mssql"
