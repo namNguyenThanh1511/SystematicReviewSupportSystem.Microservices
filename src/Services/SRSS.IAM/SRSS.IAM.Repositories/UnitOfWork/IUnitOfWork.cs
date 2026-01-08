@@ -1,13 +1,11 @@
-﻿using SRSS.IAM.Repositories.UserRepo;
+﻿using Shared.Repositories;
+using SRSS.IAM.Repositories.UserRepo;
 
 namespace SRSS.IAM.Repositories.UnitOfWork
 {
-    public interface IUnitOfWork
+    // Service-specific interface extends base
+    public interface IUnitOfWork : IUnitOfWork<AppDbContext>
     {
         IUserRepository Users { get; }
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
-        Task BeginTransactionAsync(CancellationToken cancellationToken = default);
-        Task CommitTransactionAsync(CancellationToken cancellationToken = default);
-        Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
     }
 }

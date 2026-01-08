@@ -17,7 +17,7 @@ namespace Shared.Middlewares
 
             if (!string.IsNullOrEmpty(token))
             {
-                var isBlacklisted = await redisService.ExistsAsync($"blacklist:{token}");
+                var isBlacklisted = await redisService.ExistsAsync($"iam:blacklist:{token}");
                 if (isBlacklisted)
                 {
                     context.Response.StatusCode = 401;

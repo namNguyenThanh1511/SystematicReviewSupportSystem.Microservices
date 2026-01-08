@@ -74,5 +74,17 @@ namespace SRSS.IAM.API.Controllers
             var response = ResponseBuilder.InternalServerError(message);
             return StatusCode(500, response);
         }
+
+        protected ActionResult<ApiResponse> Conflict(string message = "Xung đột dữ liệu", List<ApiError>? errors = null)
+        {
+            var response = ResponseBuilder.Conflict(message, errors);
+            return StatusCode(409, response);
+        }
+
+        protected ActionResult<ApiResponse> TooManyRequests(string message = "Quá nhiều yêu cầu. Vui lòng thử lại sau.", List<ApiError>? errors = null)
+        {
+            var response = ResponseBuilder.Error(message, errors);
+            return StatusCode(429, response);
+        }
     }
 }

@@ -1,15 +1,17 @@
-﻿using SRSS.IAM.Repositories;
-using SRSS.IAM.Repositories.Entities.BaseEntity;
+﻿using Microsoft.EntityFrameworkCore;
+using Shared.Entities.BaseEntity;
+using System.Linq.Expressions;
 
-namespace SRSS.IAM.Repositories.GenericRepository
+namespace Shared.Repositories
 {
-
-    public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey>
-    where TEntity : BaseEntity<TKey>
+    public class GenericRepository<TEntity, TKey, TDbContext>
+        : IGenericRepository<TEntity, TKey, TDbContext>
+        where TEntity : BaseEntity<TKey>
+        where TDbContext : DbContext
     {
-        protected readonly AppDbContext _context;
+        protected readonly TDbContext _context;
 
-        public GenericRepository(AppDbContext context)
+        public GenericRepository(TDbContext context)
         {
             _context = context;
         }

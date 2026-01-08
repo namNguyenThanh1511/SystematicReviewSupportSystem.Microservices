@@ -1,13 +1,17 @@
-﻿using SRSS.IAM.Repositories.Entities.BaseEntity;
+﻿using Microsoft.EntityFrameworkCore;
+using Shared.Entities.BaseEntity;
+using System.Linq.Expressions;
 
-namespace SRSS.IAM.Repositories.GenericRepository
+namespace Shared.Repositories
 {
-    public interface IGenericRepository<TEntity, in TKey> where TEntity : BaseEntity<TKey>
+    public interface IGenericRepository<TEntity, in TKey, TDbContext>
+        where TEntity : BaseEntity<TKey>
+        where TDbContext : DbContext
     {
         Task<IEnumerable<TEntity>> FindAllAsync(
-        Expression<Func<TEntity, bool>>? predicate = null,
-        bool isTracking = true,
-        CancellationToken cancellationToken = default);
+            Expression<Func<TEntity, bool>>? predicate = null,
+            bool isTracking = true,
+            CancellationToken cancellationToken = default);
 
         Task<TEntity?> FindSingleAsync(
             Expression<Func<TEntity, bool>>? predicate = null,

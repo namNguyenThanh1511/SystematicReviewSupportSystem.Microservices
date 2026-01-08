@@ -1,4 +1,4 @@
-﻿using SRSS.IAM.Repositories.Entities.BaseEntity;
+﻿using Shared.Entities.BaseEntity;
 
 namespace SRSS.IAM.Repositories.Entities
 {
