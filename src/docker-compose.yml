@@ -2,15 +2,7 @@
 version: "3.9"
 
 services:
-  # sqlserver:
-  #   image: mcr.microsoft.com/mssql/server:2022-latest
-  #   environment:
-  #     - ACCEPT_EULA=Y
-  #     - SA_PASSWORD=Nam@15112003
-  #   ports:
-  #     - "1432:1433"
-  #   volumes:
-  #     - sqlserver-data:/var/opt/mssql
+
   iam_api:
     build:
       context: . # src/ là gốc
@@ -20,7 +12,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__SRSS_IAM_DB=Server=host.docker.internal;Database=SRSS.IAM;User Id=sa;Password=12345;TrustServerCertificate=True;
+      - ConnectionStrings__SRSS_IAM_DB=Host=host.docker.internal;Port=5432;Username=postgres;Password=15112003;Database=SRSS.IAM
       - ConnectionStrings__Redis=host.docker.internal:6379
     networks:
       - proxybackend
@@ -33,7 +25,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__SRSS_Project_DB=Server=host.docker.internal;Database=SRSS.Project;User Id=sa;Password=12345;TrustServerCertificate=True;
+      - ConnectionStrings__SRSS_Project_DB=Host=host.docker.internal;Port=5432;Username=postgres;Password=15112003;Database=SRSS.Project
       - ConnectionStrings__Redis=host.docker.internal:6379
     networks:
       - proxybackend
