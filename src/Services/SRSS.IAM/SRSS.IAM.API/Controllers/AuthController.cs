@@ -108,7 +108,7 @@ namespace SRSS.IAM.API.Controllers
         }
 
 
-        private static CookieOptions BuildCookieOptions(DateTime expiresUtc)
+        private static CookieOptions BuildCookieOptions(DateTimeOffset expiresUtc)
         {
             return new CookieOptions
             {

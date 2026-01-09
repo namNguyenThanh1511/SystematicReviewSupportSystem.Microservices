@@ -31,7 +31,7 @@ namespace SRSS.IAM.Services.RefreshTokenService
             var refreshToken = GenerateRandomToken();
 
             // ✅ 2. Set thời gian chuẩn UTC
-            var expiresAt = DateTime.UtcNow.AddDays(_refreshTokenLifetimeDays);
+            var expiresAt = DateTimeOffset.UtcNow.AddDays(_refreshTokenLifetimeDays);
 
             // ✅ 3. Lấy user
             var user = await _unitOfWork.Users.FindSingleAsync(u => u.Id == userId)
@@ -82,7 +82,7 @@ namespace SRSS.IAM.Services.RefreshTokenService
 
             if (user.IsRefreshTokenRevoked) return null;
 
-            if (user.RefreshTokenExpiryTime == null || user.RefreshTokenExpiryTime < DateTime.UtcNow)
+            if (user.RefreshTokenExpiryTime == null || user.RefreshTokenExpiryTime < DateTimeOffset.UtcNow)
             {
                 return null;
             }

@@ -47,8 +47,8 @@ namespace SRSS.Project.Domain.Entities
             EC4: Duplicate studies
 
          */
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateTimeOffset? StartDate { get; set; }
+        public DateTimeOffset? EndDate { get; set; }
         public Guid? CreatedBy { get; set; }
         public ProjectStatus Status { get; set; }
         public byte[] RowVersion { get; set; } // For concurrency
