@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Cache;
 using Shared.DependencyInjection;
-using SRSS.Project.Infrastructure.ProjectRepo;
 using SRSS.Project.Infrastructure.Repositories;
 
 namespace SRSS.Project.Infrastructure.DependencyInjection
@@ -25,7 +24,7 @@ namespace SRSS.Project.Infrastructure.DependencyInjection
             SharedServiceContainer.AddSharedServices(services, config, config["MySerilog:FileName"]!);
             //create dependecy injection (DI)
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IProjectRepository, ProjectRepository>();
+
 
             return services;
         }
