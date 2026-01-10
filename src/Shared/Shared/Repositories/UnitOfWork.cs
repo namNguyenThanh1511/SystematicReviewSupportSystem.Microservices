@@ -55,7 +55,7 @@ namespace Shared.Repositories
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            var date = DateTime.UtcNow;
+            var date = DateTimeOffset.UtcNow;
             foreach (var entry in _dbContext.ChangeTracker.Entries<IBaseEntity>())
             {
                 if (entry.State == EntityState.Added)

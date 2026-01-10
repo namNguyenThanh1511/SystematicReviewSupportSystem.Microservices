@@ -2,8 +2,8 @@
 {
     public interface IBaseEntity
     {
-        DateTime? CreatedAt { get; set; }
-        DateTime? ModifiedAt { get; set; }
+        DateTimeOffset CreatedAt { get; set; }
+        DateTimeOffset ModifiedAt { get; set; }
     }
 
     public interface IBaseEntity<T> : IBaseEntity

@@ -1,4 +1,4 @@
-﻿
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -15,7 +15,7 @@ namespace SRSS.IAM.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            
+            var config = builder.Configuration;
             // Add services to the container.
             //DotNetEnv.Env.Load();
 
@@ -23,7 +23,7 @@ namespace SRSS.IAM.API
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.ConfigureSwaggerForAuthentication();
-            builder.Services.ConfigureJWT(builder.Configuration);
+            builder.Services.ConfigureJWT(config);
             builder.Services.ConfigureGlobalException();
 
             // Configure logging (Console + Debug)
@@ -35,14 +35,15 @@ namespace SRSS.IAM.API
             builder.Logging.AddConsole();
 
             // Database connection
-            var connectionString = builder.Configuration.GetConnectionString("SRSS_IAM_DB");
+            var connectionString = config.GetConnectionString("SRSS_IAM_DB");
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(connectionString));
+                options.UseNpgsql(connectionString,
+                sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
 
             // Redis connection
-            builder.Services.AddRedisCacheWithHealthCheck(builder.Configuration);
+            builder.Services.AddRedisCacheWithHealthCheck(config);
 
-            builder.Services.AddApplicationServices(builder.Configuration);
+            builder.Services.AddApplicationServices(config);
 
             builder.Services.Configure<ApiBehaviorOptions>(options =>
             {
@@ -71,7 +72,7 @@ namespace SRSS.IAM.API
             var logger = app.Services.GetRequiredService<ILogger<Program>>();
             logger.LogInformation("🚀 Application starting in {Environment} environment", environment);
             logger.LogInformation("📦 SQL Server connection string: {Connection}", connectionString);
-            logger.LogInformation("🔗 Redis connection: {Redis}", builder.Configuration.GetConnectionString("Redis"));
+            logger.LogInformation("🔗 Redis connection: {Redis}", config.GetConnectionString("Redis"));
 
             app.UseMiddleware<JwtBlacklistMiddleware>();
 

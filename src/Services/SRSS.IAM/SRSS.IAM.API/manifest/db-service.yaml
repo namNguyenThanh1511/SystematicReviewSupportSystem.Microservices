@@ -9,6 +9,6 @@ spec:
   selector:
     srss: iam-db
   ports:
-    - port: 1433
-      targetPort: 1433
-      name: srss-iam-mssql
+    - port: 5432
+      targetPort: 5432
+      name: srss-iam-postgres
