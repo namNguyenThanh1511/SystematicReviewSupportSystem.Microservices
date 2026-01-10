@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Cache;
 using Shared.DependencyInjection;
-using SRSS.Project.Application.Interfaces;
 using SRSS.Project.Infrastructure.Repositories;
 
 namespace SRSS.Project.Infrastructure.DependencyInjection
@@ -17,7 +16,7 @@ namespace SRSS.Project.Infrastructure.DependencyInjection
             //Add database connectivity
             services.AddDbContext<Data.ProjectDbContext>(options =>
                 options.UseNpgsql(config.GetConnectionString("SRSS_Project_DB"),
-                sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
+                npgsqlOptions => npgsqlOptions.EnableRetryOnFailure()));
             //add redis before because jwt blacklist middleware depends on it
             services.AddRedisCacheWithHealthCheck(config);
             //add authentication scheme
@@ -25,6 +24,7 @@ namespace SRSS.Project.Infrastructure.DependencyInjection
             SharedServiceContainer.AddSharedServices(services, config, config["MySerilog:FileName"]!);
             //create dependecy injection (DI)
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 
             return services;
         }

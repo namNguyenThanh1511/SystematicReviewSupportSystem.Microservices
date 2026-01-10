@@ -2,7 +2,6 @@
 version: "3.9"
 
 services:
-
   iam_api:
     build:
       context: . # src/ là gốc
@@ -12,8 +11,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__SRSS_IAM_DB=Host=host.docker.internal;Port=5432;Username=postgres;Password=15112003;Database=SRSS.IAM
-      - ConnectionStrings__Redis=host.docker.internal:6379
+      - ConnectionStrings__SRSS_IAM_DB=Host=${SRSS_IAM_DB_HOST};Port=5432;Username=${SRSS_IAM_DB_USERNAME};Password=${SRSS_IAM_DB_PASSWORD};Database=${SRSS_IAM_DB_NAME}
+      - ConnectionStrings__Redis=${REDIS_HOST}:6379
     networks:
       - proxybackend
   project_api:
@@ -25,8 +24,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__SRSS_Project_DB=Host=host.docker.internal;Port=5432;Username=postgres;Password=15112003;Database=SRSS.Project
-      - ConnectionStrings__Redis=host.docker.internal:6379
+      - ConnectionStrings__SRSS_Project_DB=Host=${SRSS_Project_DB_HOST};Port=5432;Username=${SRSS_Project_DB_USERNAME};Password=${SRSS_Project_DB_PASSWORD};Database=${SRSS_Project_DB_NAME}
+      - ConnectionStrings__Redis=${REDIS_HOST}:6379
     networks:
       - proxybackend
   api-gateway:
@@ -43,7 +42,7 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Password=123456
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
     volumes:
-      - ../https:/https:ro # LÊN 1 cấp 
+      - ../https:/https:ro # LÊN 1 cấp
     depends_on:
       - iam_api
       - project_api
@@ -52,7 +51,7 @@ services:
 
 volumes:
   sqlserver-data:
-  
+
 networks:
   proxybackend:
     name: proxybackend
