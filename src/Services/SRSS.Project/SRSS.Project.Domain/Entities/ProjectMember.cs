@@ -15,8 +15,8 @@ namespace SRSS.Project.Domain.Entities
     public enum ProjectRole
     {
         LeadReviewer,
-        Reviewer,
-        Viewer
+        MainResearcher,
+        Reviewer
     }
 
 }

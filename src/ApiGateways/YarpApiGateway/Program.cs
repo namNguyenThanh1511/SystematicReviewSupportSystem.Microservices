@@ -55,7 +55,7 @@ app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/iam/swagger/v1/swagger.json", "IAM Service v1");
     options.SwaggerEndpoint("/swagger/project/swagger/v1/swagger.json", "Project Service v1");
-    options.RoutePrefix = string.Empty;
+    options.RoutePrefix = string.Empty;//Swagger UI được mount tại ROOT /
 });
 
 
@@ -65,7 +65,7 @@ app.UseCors();
 app.UseRateLimiter();
 
 app.UseAuthentication();
-//app.UseAuthorization();
+
 
 app.MapReverseProxy(proxyPipeline =>
 {

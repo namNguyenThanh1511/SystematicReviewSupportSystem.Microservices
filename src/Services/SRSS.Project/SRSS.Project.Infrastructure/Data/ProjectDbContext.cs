@@ -6,7 +6,7 @@ namespace SRSS.Project.Infrastructure.Data
     {
         protected override void OnModelCreating(ModelBuilder builder)
                => builder.ApplyConfigurationsFromAssembly(AssemblyReference.Assembly);
-        
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
