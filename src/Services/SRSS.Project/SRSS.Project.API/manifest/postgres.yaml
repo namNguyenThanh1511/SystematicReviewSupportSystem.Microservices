@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: srss-project-db
+  namespace: amayakuro
+data:
+  POSTGRES_DB: SRSS.Project
+  POSTGRES_PASSWORD: U0VDUkVUX1BBLMAOU1NXT1JE
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: srss-project-db
+  namespace: amayakuro
+spec:
+  serviceName: "srss-project-db"
+  selector:
+    matchLabels:
+      srss: project-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        srss: project-db
+    spec:
+      containers:
+        - name: postgres # container name within the pod.
+          image: postgres:18
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "2"
+          ports:
+          - containerPort: 5432
+            name: tcppostgres
+          envFrom:
+            - configMapRef:
+              name: srss-project-db
+            # volumeMounts:
+            # - name: srss
+            #   mountPath: "/var/opt/mssql"
+
+      topologySpreadConstraints:
+        - maxSkew: 2
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              topology.kubernetes.io/zone: sgmy
+
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: topology.kubernetes.io/zone
+                operator: In
+                values:
+                - sgmy

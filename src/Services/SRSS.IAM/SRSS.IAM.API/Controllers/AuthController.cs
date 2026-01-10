@@ -40,6 +40,29 @@ namespace SRSS.IAM.API.Controllers
 
         }
 
+        ///<summary>
+        /// Đăng nhập bằng Authentication Code của Google
+        ///</summary>
+        /// <param name="request">Authorization code sau khi người dùng hoàn thành OAuth flow và được Google gửi về</param>
+        [HttpPost("google/login")]
+        public async Task<ActionResult<ApiResponse<LoginResponse>>> GoogleLogin([FromBody] GoogleLoginRequest request)
+        {
+            var result = await _authService.GoogleLoginAsync(request);
+            await IssueRefreshTokenAsync(result.UserId);
+            return Ok(result, "Đăng nhập bằng Google thành công");
+        }
+
+        /// <summary>
+        /// Tạo Google OAuth URL để người dùng đăng nhập
+        /// </summary>
+        /// <param name="request">Request chứa redirectUrl - địa chỉ redirect về để nhận authorization code sau khi người dùng hoàn thành OAuth flow</param>
+        [HttpPost("google/oauth-url")]
+        public async Task<ActionResult<ApiResponse<GoogleOAuthUrlResponse>>> GenerateGoogleOAuthUrl([FromBody] GoogleOAuthUrlRequest request)
+        {
+            var result = await _authService.GenerateGoogleOAuthUrlAsync(request);
+            return Ok(result, "Tạo Google OAuth URL thành công");
+        }
+
         [HttpPost("refresh")]
         public async Task<ActionResult<ApiResponse<LoginResponse>>> RefreshToken()
         {
