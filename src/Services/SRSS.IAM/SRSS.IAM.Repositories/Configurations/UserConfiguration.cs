@@ -9,7 +9,7 @@ namespace SRSS.IAM.Repositories.Configurations
         {
             builder.ToTable("Users");
             builder.HasKey(u => u.Id);
-            builder.Property(u => u.Password).IsRequired();
+            builder.Property(u => u.Password).IsRequired(false);
             builder.Property(u => u.Email).HasMaxLength(100).IsRequired(false);
             builder.HasIndex(u => u.Email).IsUnique();
             builder.Property(u => u.Username).HasMaxLength(50);

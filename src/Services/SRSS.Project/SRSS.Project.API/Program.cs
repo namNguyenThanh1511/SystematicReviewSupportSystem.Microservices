@@ -28,8 +28,8 @@ app.UseSwagger(c =>
         var publicBaseUrl = config["Swagger:PublicBaseUrl"];
         swaggerDoc.Servers = new List<OpenApiServer>
                     {
-                        new OpenApiServer { Url = publicBaseUrl, Description = "Via API Gateway" },
-                        new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}", Description = "Direct API Access (Use this for testing)" }
+                        new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}", Description = "Direct API Access (Use this for testing)" },
+                        new OpenApiServer { Url = "/project", Description = "Via API Gateway (Production)" }
                     };
     });
 });

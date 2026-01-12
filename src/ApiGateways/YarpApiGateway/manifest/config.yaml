@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: srss-gateway
+  namespace: amayakuro
+data:
+  appsettings.Production.json: |-
+    {
+      "JwtSettings": {
+        "ValidIssuer": "SRSS",
+        "ValidAudience": "SRSSUsers",
+        "ValidateAudience": true,
+        "AccessTokenExpirationMinutes": 15,
+        "RefreshTokenExpirationDays": 30,
+        "secretKey": "DhftOS5uphK3vmCJQrexST1RsyjZBjXWRgJMFPU4"
+      },
+      "ReverseProxy": {
+        "Transforms": [
+          {
+            "RequestHeader": "Authorization",
+            "Append": "{Authorization}"
+          }
+        ],
+        "Routes": {
+          "swagger-iam": {
+            "ClusterId": "iam-cluster",
+            "Match": { "Path": "/swagger/iam/{**catch-all}" },
+            "Transforms": [ { "PathRemovePrefix": "/swagger/iam" } ]
+          },
+          "iam-route": {
+            "ClusterId": "iam-cluster",
+            "Match": { "Path": "/iam/{**catch-all}" },
+            "Transforms": [ { "PathRemovePrefix": "/iam" } ]
+          },
+          "api1-route": {
+            "ClusterId": "api1-cluster",
+            "Match": {
+              "Path": "api/{**catch-all}"
+            }
+          },
+          "swagger-project": {
+            "ClusterId": "project-cluster",
+            "Match": { "Path": "/swagger/project/{**catch-all}" },
+            "Transforms": [ { "PathRemovePrefix": "/swagger/project" } ]
+          },
+          "project-route": {
+            "ClusterId": "project-cluster",
+            "Match": {
+              "Path": "/project/{**catch-all}"
+            },
+            "Transforms": [ { "PathRemovePrefix": "/project" } ]
+          }
+        },
+        "Clusters": {
+          "iam-cluster": {
+            "Destinations": {
+              "dest": { "Address": "http://srss-iam-service.amayakuro.svc.cluster.local/" }
+            }
+          },
+          "api1-cluster": {
+            "Destinations": {
+              "destination1": {
+                "Address": "http://localhost:8080"
+              }
+            }
+          },
+          "project-cluster": {
+            "Destinations": {
+              "destination2": {
+                "Address": "http://srss-project-service.amayakuro.svc.cluster.local/"
+              }
+            }
+          }
+        }
+      }
+    }
