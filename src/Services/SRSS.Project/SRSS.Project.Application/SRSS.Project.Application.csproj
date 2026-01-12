@@ -10,4 +10,8 @@
     <ProjectReference Include="..\SRSS.Project.Domain\SRSS.Project.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+  </ItemGroup>
+
 </Project>

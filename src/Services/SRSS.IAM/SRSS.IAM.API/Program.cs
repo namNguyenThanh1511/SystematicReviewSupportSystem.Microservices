@@ -38,7 +38,7 @@ namespace SRSS.IAM.API
             var connectionString = config.GetConnectionString("SRSS_IAM_DB");
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(connectionString,
-                sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
+                npgsqlOptions => npgsqlOptions.EnableRetryOnFailure()));
 
             // Redis connection
             builder.Services.AddRedisCacheWithHealthCheck(config);
@@ -71,7 +71,7 @@ namespace SRSS.IAM.API
             // 🔥 LOG MÔI TRƯỜNG VÀ CONNECTION INFO
             var logger = app.Services.GetRequiredService<ILogger<Program>>();
             logger.LogInformation("🚀 Application starting in {Environment} environment", environment);
-            logger.LogInformation("📦 SQL Server connection string: {Connection}", connectionString);
+            logger.LogInformation("📦 PostgreSQL connection string: {Connection}", connectionString);
             logger.LogInformation("🔗 Redis connection: {Redis}", config.GetConnectionString("Redis"));
 
             app.UseMiddleware<JwtBlacklistMiddleware>();
@@ -97,8 +97,7 @@ namespace SRSS.IAM.API
             {
                 c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
                 {
-                    // Hỗ trợ cả Direct API access và Gateway access
-                    // Direct API làm mặc định (first in list) để test
+                    var publicBaseUrl = config["Swagger:PublicBaseUrl"];
                     swaggerDoc.Servers = new List<OpenApiServer>
                     {
                         new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}", Description = "Direct API Access (Use this for testing)" },
