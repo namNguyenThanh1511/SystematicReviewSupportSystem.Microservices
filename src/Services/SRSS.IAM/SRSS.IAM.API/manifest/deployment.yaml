@@ -50,10 +50,18 @@ spec:
               topology.kubernetes.io/zone: sgmy
       affinity:
         nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 50
+              preference:
+                matchExpressions:
                   - key: topology.kubernetes.io/zone
                     operator: In
                     values:
                       - sgmy
+            - weight: 10
+              preference:
+                matchExpressions:
+                  - key: k8s.badaimweeb.me/zone-tier1
+                    operator: In
+                    values:
+                      - asia-se
