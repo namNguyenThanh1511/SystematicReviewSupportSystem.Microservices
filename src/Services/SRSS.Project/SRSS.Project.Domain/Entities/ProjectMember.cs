@@ -7,7 +7,7 @@ namespace SRSS.Project.Domain.Entities
         public Guid ProjectId { get; set; }
         public Guid UserId { get; set; }
         public ProjectRole Role { get; set; } // LeadReviewer, Reviewer, Viewer
-        public DateTimeOffset AssignedAt { get; set; }
+        public DateTimeOffset JoinedAt { get; set; }
 
         //Navigation Properties
         public Project Project { get; set; }

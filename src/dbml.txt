@@ -1,0 +1,132 @@
+// ===============================
+// Project Service – Prisma-SLR
+// ===============================
+
+Table projects {
+  id uuid [pk]
+  name varchar [not null]
+  abbreviation varchar [not null]
+  description text
+
+  research_questions jsonb [not null]
+  inclusion_criteria jsonb [not null]
+  exclusion_criteria jsonb [not null]
+
+  phase project_phase [not null]
+  criteria_version int [not null, default: 1]
+  phase_changed_at timestamptz
+
+  start_date timestamptz
+  expected_end_date timestamptz
+  actual_end_date timestamptz
+
+  is_deleted boolean [not null, default: false]
+
+  created_by uuid
+  updated_by uuid
+
+  created_at timestamptz
+  updated_at timestamptz
+
+}
+
+// ===============================
+// Project Member
+// ===============================
+Table project_members {
+  id uuid [pk]
+  project_id uuid [not null]
+  user_id uuid [not null]
+  role project_member_role [not null]
+  joined_at timestamptz [not null]
+  
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+// ===============================
+// Search Source
+// ===============================
+Table search_sources {
+  id uuid [pk]
+  project_id uuid [not null]
+  source_name varchar [not null] // IEEE, ACM, Scopus, Manual
+  source_type search_source_type [not null] // Database, Manual
+  planned_search_string text
+  notes text
+}
+
+// ===============================
+// Import Batch
+// ===============================
+Table import_batches {
+  id uuid [pk]
+  project_id uuid [not null]
+  search_source_id uuid [not null]
+  executed_at timestamptz [not null]
+  executed_search_string text [not null]
+  records_retrieved int [not null]
+  reason varchar // Initial search / Additional search
+  phase_at_import project_phase [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+// ===============================
+// Project Audit Log
+// ===============================
+Table project_audit_logs {
+  id uuid [pk]
+  project_id uuid [not null]
+  user_id uuid [not null]
+
+  action varchar [not null]
+  description text
+
+  old_value jsonb
+  new_value jsonb
+
+  performed_at timestamptz [not null]
+}
+
+// ===============================
+// ENUMS
+// ===============================
+
+Enum project_phase {
+  Draft
+  SearchCompleted
+  TitleAbstractScreening
+  FullTextScreening
+  DataExtraction
+  QualityAssessment
+  SynthesisAndReporting
+  Locked
+}
+
+
+Enum project_member_role {
+  LeadReviewer
+  MainResearcher
+  Reviewer
+}
+
+Enum search_source_type{
+	Database
+	Register
+	GreyLiterature
+	HandSearch
+	Other
+}
+
+
+
+// ===============================
+// RELATIONSHIPS
+// ===============================
+
+Ref: project_members.project_id > projects.id
+Ref: search_sources.project_id > projects.id
+Ref: import_batches.project_id > projects.id
+Ref: project_audit_logs.project_id > projects.id
+Ref: import_batches.search_source_id > search_sources.id
