@@ -23,146 +23,320 @@ namespace SRSS.Project.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("SRSS.Project.Domain.Entities.ImportBatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset>("ExecutedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("executed_at");
+
+                    b.Property<string>("ExecutedSearchString")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("executed_search_string");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("PhaseAtImport")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("phase_at_import");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("reason");
+
+                    b.Property<int>("RecordsRetrieved")
+                        .HasColumnType("integer")
+                        .HasColumnName("records_retrieved");
+
+                    b.Property<Guid>("SearchSourceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("search_source_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("SearchSourceId");
+
+                    b.ToTable("import_batches", (string)null);
+                });
+
             modelBuilder.Entity("SRSS.Project.Domain.Entities.Project", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("Abbreviation")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("abbreviation");
+
+                    b.Property<DateTimeOffset?>("ActualEndDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("actual_end_date");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<Guid?>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<int>("CriteriaVersion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("criteria_version");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<DateTimeOffset?>("EndDate")
-                        .IsRequired()
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("text")
+                        .HasColumnName("description");
 
                     b.Property<JsonDocument>("ExclusionCriteria")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("exclusion_criteria");
+
+                    b.Property<DateTimeOffset?>("ExpectedEndDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expected_end_date");
 
                     b.Property<JsonDocument>("InclusionCriteria")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("inclusion_criteria");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
 
                     b.Property<DateTimeOffset>("ModifiedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
-                    b.Property<string>("NameEn")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
 
-                    b.Property<string>("NameVn")
+                    b.Property<string>("Phase")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text")
+                        .HasColumnName("phase");
 
-                    b.Property<string>("ProsperoId")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                    b.Property<DateTimeOffset>("PhaseChangedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("phase_changed_at");
 
                     b.Property<JsonDocument>("ResearchQuestions")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("jsonb");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("research_questions");
 
                     b.Property<DateTimeOffset?>("StartDate")
-                        .IsRequired()
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_date");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects", (string)null);
+                    b.ToTable("projects", (string)null);
+                });
+
+            modelBuilder.Entity("SRSS.Project.Domain.Entities.ProjectAuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("action");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<JsonDocument>("NewValue")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("new_value");
+
+                    b.Property<JsonDocument>("OldValue")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("old_value");
+
+                    b.Property<DateTimeOffset>("PerformedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("performed_at");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PerformedAt");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("project_audit_logs", (string)null);
                 });
 
             modelBuilder.Entity("SRSS.Project.Domain.Entities.ProjectMember", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("AssignedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset>("JoinedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("joined_at");
 
                     b.Property<DateTimeOffset>("ModifiedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid>("ProjectId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("role");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("ProjectMembers", (string)null);
+                    b.HasIndex("UserId");
+
+                    b.ToTable("project_members", (string)null);
                 });
 
-            modelBuilder.Entity("SRSS.Project.Domain.Entities.ProjectStageStage", b =>
+            modelBuilder.Entity("SRSS.Project.Domain.Entities.SearchSource", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("CompletionPercentage")
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<DateTimeOffset>("ModifiedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("PlannedSearchString")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("planned_search_string");
 
                     b.Property<Guid>("ProjectId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("project_id");
 
-                    b.Property<string>("StageName")
+                    b.Property<string>("SourceName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("source_name");
 
-                    b.Property<string>("Status")
+                    b.Property<string>("SourceType")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("source_type");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("ProjectStages", (string)null);
+                    b.ToTable("search_sources", (string)null);
+                });
+
+            modelBuilder.Entity("SRSS.Project.Domain.Entities.ImportBatch", b =>
+                {
+                    b.HasOne("SRSS.Project.Domain.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SRSS.Project.Domain.Entities.SearchSource", "SearchSource")
+                        .WithMany()
+                        .HasForeignKey("SearchSourceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("SearchSource");
+                });
+
+            modelBuilder.Entity("SRSS.Project.Domain.Entities.ProjectAuditLog", b =>
+                {
+                    b.HasOne("SRSS.Project.Domain.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("SRSS.Project.Domain.Entities.ProjectMember", b =>
@@ -176,10 +350,10 @@ namespace SRSS.Project.Infrastructure.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("SRSS.Project.Domain.Entities.ProjectStageStage", b =>
+            modelBuilder.Entity("SRSS.Project.Domain.Entities.SearchSource", b =>
                 {
                     b.HasOne("SRSS.Project.Domain.Entities.Project", "Project")
-                        .WithMany("Stages")
+                        .WithMany("SearchSources")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -191,7 +365,7 @@ namespace SRSS.Project.Infrastructure.Migrations
                 {
                     b.Navigation("Members");
 
-                    b.Navigation("Stages");
+                    b.Navigation("SearchSources");
                 });
 #pragma warning restore 612, 618
         }

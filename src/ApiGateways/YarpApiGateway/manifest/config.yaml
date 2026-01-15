@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: srss-gateway
+  namespace: amayakuro
+data:
+  appsettings.Production.json: |-
+    {
+      "JwtSettings": {
+        "ValidIssuer": "SRSS",
+        "ValidAudience": "SRSSUsers",
+        "ValidateAudience": true,
+        "AccessTokenExpirationMinutes": 15,
+        "RefreshTokenExpirationDays": 30,
+        "secretKey": "DhftOS5uphK3vmCJQrexST1RsyjZBjXWRgJMFPU4"
+      },
+      "SwaggerServices": [
+        {
+          "Name": "IAM Service",
+          "Version": "v1",
+          "Endpoint": "/iam/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Project Service",
+          "Version": "v1",
+          "Endpoint": "/project/swagger/v1/swagger.json"
+        }
+      ],
+      "ReverseProxy": {
+        "Transforms": [
+          {
+            "RequestHeader": "Authorization",
+            "Append": "{Authorization}"
+          }
+        ],
+        "Routes": {
+          "iam-route": {
+            "ClusterId": "iam-cluster",
+            "Match": { "Path": "/iam/{**catch-all}" },
+            "Transforms": [ { "PathRemovePrefix": "/iam" } ]
+          },
+          "project-route": {
+            "ClusterId": "project-cluster",
+            "Match": {
+              "Path": "/project/{**catch-all}"
+            },
+            "Transforms": [ { "PathRemovePrefix": "/project" } ]
+          }
+        },
+        "Clusters": {
+          "iam-cluster": {
+            "Destinations": {
+              "dest": { "Address": "http://srss-iam-service.amayakuro.svc.cluster.local/" }
+            }
+          },
+          "project-cluster": {
+            "Destinations": {
+              "destination2": {
+                "Address": "http://srss-project-service.amayakuro.svc.cluster.local/"
+              }
+            }
+          }
+        }
+      }
+    }

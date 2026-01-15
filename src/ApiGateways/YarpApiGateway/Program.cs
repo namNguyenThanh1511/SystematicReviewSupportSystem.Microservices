@@ -53,9 +53,18 @@ app.UseSwagger(c =>
 
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/iam/swagger/v1/swagger.json", "IAM Service v1");
-    options.SwaggerEndpoint("/swagger/project/swagger/v1/swagger.json", "Project Service v1");
-    options.RoutePrefix = string.Empty;//Swagger UI được mount tại ROOT /
+    // Load swagger services from configuration
+    var swaggerServices = configuration.GetSection("SwaggerServices").Get<List<SwaggerServiceConfig>>();
+    
+    if (swaggerServices != null && swaggerServices.Any())
+    {
+        foreach (var service in swaggerServices)
+        {
+            options.SwaggerEndpoint(service.Endpoint, $"{service.Name} {service.Version}");
+        }
+    }
+    
+    options.RoutePrefix = string.Empty; // Swagger UI được mount tại ROOT /
 });
 
 
@@ -104,3 +113,12 @@ app.MapReverseProxy(proxyPipeline =>
 
 
 app.Run();
+
+
+// Configuration model for Swagger services
+public class SwaggerServiceConfig
+{
+    public string Name { get; set; } = string.Empty;
+    public string Version { get; set; } = string.Empty;
+    public string Endpoint { get; set; } = string.Empty;
+}
