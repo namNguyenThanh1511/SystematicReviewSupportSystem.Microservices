@@ -16,5 +16,6 @@ data:
       },
       "ConnectionStrings": {
         "SRSS_PROJECT_DB": "Host=srss-project-db-service.amayakuro.svc.cluster.local; Port=5432; Username=postgres; Password=U0VDUkVUX1BBLMAOU1NXT1JE; Database=SRSS.Project",
+        "Redis": "redis-service.amayakuro.svc.cluster.local:6379,allowAdmin=true,connectTimeout=10000,syncTimeout=10000,asyncTimeout=10000,connectRetry=4,abortConnect=false,keepAlive=60"
       }
     }
