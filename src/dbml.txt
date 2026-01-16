@@ -1,5 +1,5 @@
-// ===============================
-// Project Service � Prisma-SLR
+﻿// ===============================
+// Project Service – Prisma-SLR
 // ===============================
 
 Table projects {

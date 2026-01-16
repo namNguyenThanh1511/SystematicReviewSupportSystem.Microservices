@@ -39,7 +39,8 @@ namespace SRSS.Project.Infrastructure.Configurations
 
             builder.Property(ib => ib.Reason)
                 .HasColumnName("reason")
-                .HasMaxLength(255);
+                .HasMaxLength(255)
+                .IsRequired(false);
 
             builder.Property(ib => ib.PhaseAtImport)
                 .HasColumnName("phase_at_import")

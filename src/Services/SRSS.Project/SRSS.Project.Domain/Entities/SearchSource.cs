@@ -19,8 +19,8 @@ namespace SRSS.Project.Domain.Entities
         public Guid ProjectId { get; set; }
         public string SourceName { get; set; } // e.g.,PubMed, Scopus, Google Scholar, Web of Science, ...
         public SearchSourceType SourceType { get; set; }
-        public string PlannedSearchString { get; set; }
-        public string Notes { get; set; }
+        public string? PlannedSearchString { get; set; }
+        public string? Notes { get; set; }
 
         //Navigation Properties
         public Project Project { get; set; }

@@ -7,7 +7,7 @@ namespace SRSS.Project.Domain.Entities
     {
         public string Name { get; set; } // Required
         public string Abbreviation { get; set; } // Required
-        public string Description { get; set; }
+        public string? Description { get; set; }
         public JsonDocument ResearchQuestions { get; set; } // postge auto map to jsonb
         /*
           RQ1: What AI techniques are commonly used in adaptive learning systems?
@@ -56,7 +56,7 @@ namespace SRSS.Project.Domain.Entities
          */
         public ProjectPhase Phase { get; set; }
         public int CriteriaVersion { get; set; } // Track changes in criteria
-        public DateTimeOffset PhaseChangedAt { get; set; }
+        public DateTimeOffset? PhaseChangedAt { get; set; }
         public DateTimeOffset? StartDate { get; set; }
         public DateTimeOffset? ExpectedEndDate { get; set; }
         public DateTimeOffset? ActualEndDate { get; set; }

@@ -31,7 +31,9 @@ namespace SRSS.Project.Infrastructure.Configurations
 
             builder.Property(pal => pal.Description)
                 .HasColumnName("description")
-                .HasColumnType("text");
+                .HasColumnType("text")
+                .IsRequired(false);
+
 
             builder.Property(pal => pal.OldValue)
                 .HasColumnName("old_value")

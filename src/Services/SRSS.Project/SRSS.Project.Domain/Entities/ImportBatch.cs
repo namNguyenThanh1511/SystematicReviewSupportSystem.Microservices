@@ -18,7 +18,7 @@ namespace SRSS.Project.Domain.Entities
 
         public int RecordsRetrieved { get; set; }
 
-        public string Reason { get; set; } // Initial / Additional
+        public string? Reason { get; set; } // Initial / Additional
         public ProjectPhase PhaseAtImport { get; set; }
 
         // Navigation Properties

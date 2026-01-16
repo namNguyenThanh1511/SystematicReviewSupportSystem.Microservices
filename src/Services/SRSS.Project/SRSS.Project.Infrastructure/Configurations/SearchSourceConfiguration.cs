@@ -32,11 +32,13 @@ namespace SRSS.Project.Infrastructure.Configurations
 
             builder.Property(ss => ss.PlannedSearchString)
                 .HasColumnName("planned_search_string")
-                .HasColumnType("text");
+                .HasColumnType("text")
+                .IsRequired(false);
 
             builder.Property(ss => ss.Notes)
                 .HasColumnName("notes")
-                .HasColumnType("text");
+                .HasColumnType("text")
+                .IsRequired(false);
 
             builder.Property(ss => ss.CreatedAt)
                 .HasColumnName("created_at")
