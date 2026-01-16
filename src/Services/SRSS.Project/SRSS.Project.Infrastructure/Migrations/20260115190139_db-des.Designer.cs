@@ -3,6 +3,7 @@ using System;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SRSS.Project.Infrastructure.Data;
@@ -12,9 +13,11 @@ using SRSS.Project.Infrastructure.Data;
 namespace SRSS.Project.Infrastructure.Migrations
 {
     [DbContext(typeof(ProjectDbContext))]
-    partial class ProjectDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260115190139_db-des")]
+    partial class dbdes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,6 +60,7 @@ namespace SRSS.Project.Infrastructure.Migrations
                         .HasColumnName("project_id");
 
                     b.Property<string>("Reason")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("reason");
@@ -110,6 +114,7 @@ namespace SRSS.Project.Infrastructure.Migrations
                         .HasColumnName("criteria_version");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -148,7 +153,7 @@ namespace SRSS.Project.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("phase");
 
-                    b.Property<DateTimeOffset?>("PhaseChangedAt")
+                    b.Property<DateTimeOffset>("PhaseChangedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("phase_changed_at");
 
@@ -184,6 +189,7 @@ namespace SRSS.Project.Infrastructure.Migrations
                         .HasColumnName("action");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -263,45 +269,37 @@ namespace SRSS.Project.Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("ModifiedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("text")
-                        .HasColumnName("notes");
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("PlannedSearchString")
-                        .HasColumnType("text")
-                        .HasColumnName("planned_search_string");
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Guid>("ProjectId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("project_id");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("SourceName")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("source_name");
+                        .HasColumnType("text");
 
-                    b.Property<string>("SourceType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("source_type");
+                    b.Property<int>("SourceType")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("search_sources", (string)null);
+                    b.ToTable("SearchSources");
                 });
 
             modelBuilder.Entity("SRSS.Project.Domain.Entities.ImportBatch", b =>

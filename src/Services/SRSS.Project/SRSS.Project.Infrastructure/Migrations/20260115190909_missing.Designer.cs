@@ -3,6 +3,7 @@ using System;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SRSS.Project.Infrastructure.Data;
@@ -12,9 +13,11 @@ using SRSS.Project.Infrastructure.Data;
 namespace SRSS.Project.Infrastructure.Migrations
 {
     [DbContext(typeof(ProjectDbContext))]
-    partial class ProjectDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260115190909_missing")]
+    partial class missing
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,6 +60,7 @@ namespace SRSS.Project.Infrastructure.Migrations
                         .HasColumnName("project_id");
 
                     b.Property<string>("Reason")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("reason");
@@ -110,6 +114,7 @@ namespace SRSS.Project.Infrastructure.Migrations
                         .HasColumnName("criteria_version");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -148,7 +153,7 @@ namespace SRSS.Project.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("phase");
 
-                    b.Property<DateTimeOffset?>("PhaseChangedAt")
+                    b.Property<DateTimeOffset>("PhaseChangedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("phase_changed_at");
 
@@ -184,6 +189,7 @@ namespace SRSS.Project.Infrastructure.Migrations
                         .HasColumnName("action");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -275,10 +281,12 @@ namespace SRSS.Project.Infrastructure.Migrations
                         .HasColumnName("updated_at");
 
                     b.Property<string>("Notes")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("notes");
 
                     b.Property<string>("PlannedSearchString")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("planned_search_string");
 

@@ -12,9 +12,10 @@ namespace SRSS.Project.Infrastructure.Data
             base.OnConfiguring(optionsBuilder);
         }
 
-
         public DbSet<Domain.Entities.Project> Projects { get; set; }
         public DbSet<Domain.Entities.ProjectMember> ProjectMembers { get; set; }
-        public DbSet<Domain.Entities.ProjectStageStage> ProjectStages { get; set; }
+        public DbSet<Domain.Entities.SearchSource> SearchSources { get; set; }
+        public DbSet<Domain.Entities.ImportBatch> ImportBatches { get; set; }
+        public DbSet<Domain.Entities.ProjectAuditLog> ProjectAuditLogs { get; set; }
     }
 }

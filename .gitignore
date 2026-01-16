@@ -331,3 +331,6 @@ ASALocalRun/
 
 *.env
 /src/.vscode
+/src/Services/SRSS.Project/DBML_ENTITY_VERIFICATION.md
+/src/Services/SRSS.Project/ENTITY_CONFIGURATIONS_SUMMARY.md
+/src/Services/SRSS.IAM/USER_CONFIGURATION_UPDATE.md

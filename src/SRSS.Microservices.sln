@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11408.102 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{C3A0DCF2-A623-48D3-B477-C586876F5596}"
 EndProject
@@ -26,6 +26,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SRSS.TestGateways.API", "Services\SRSS.TestGateways\SRSS.TestGateways.API\SRSS.TestGateways.API.csproj", "{2144EC49-6F04-481F-AE08-D26DD1CC63A9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SRSS.Project", "SRSS.Project", "{C273D893-E39A-41A8-A0A1-A0C740D1EB83}"
+	ProjectSection(SolutionItems) = preProject
+		dbml.txt = dbml.txt
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SRSS.Project.Domain", "Services\SRSS.Project\SRSS.Project.Domain\SRSS.Project.Domain.csproj", "{494D45C9-87E0-45EB-8193-B11E97475DDD}"
 EndProject
