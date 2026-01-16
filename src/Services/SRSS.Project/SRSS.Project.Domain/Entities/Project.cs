@@ -55,7 +55,7 @@ namespace SRSS.Project.Domain.Entities
 
          */
         public ProjectPhase Phase { get; set; }
-        public int CriteriaVersion { get; set; } // Track changes in criteria
+        //public int CriteriaVersion { get; set; } // Track changes in criteria
         public DateTimeOffset? PhaseChangedAt { get; set; }
         public DateTimeOffset? StartDate { get; set; }
         public DateTimeOffset? ExpectedEndDate { get; set; }

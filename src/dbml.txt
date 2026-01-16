@@ -13,7 +13,7 @@ Table projects {
   exclusion_criteria jsonb [not null]
 
   phase project_phase [not null]
-  criteria_version int [not null, default: 1]
+  
   phase_changed_at timestamptz
 
   start_date timestamptz

@@ -49,10 +49,10 @@ namespace SRSS.Project.Infrastructure.Configurations
                 .HasConversion<string>()
                 .IsRequired();
 
-            builder.Property(p => p.CriteriaVersion)
-                .HasColumnName("criteria_version")
-                .HasDefaultValue(1)
-                .IsRequired();
+            //builder.Property(p => p.CriteriaVersion)
+            //    .HasColumnName("criteria_version")
+            //    .HasDefaultValue(1)
+            //    .IsRequired();
 
             builder.Property(p => p.PhaseChangedAt)
                 .HasColumnName("phase_changed_at");
